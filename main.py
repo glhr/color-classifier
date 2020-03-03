@@ -31,26 +31,34 @@ def datasetToJSON():
     with open('dataset.json', 'w') as json_file:
         json.dump(images , json_file)
 
-
     # cv2.imshow('img',image_downscaled)
     # cv2.waitKey(0)
 
-# datasetToJSON()
+import os.path
 
+# if it doesn't exist create JSON file from image dataset for training
+if not os.path.isfile('dataset.json'):
+    datasetToJSON()
+
+# load image features and corresponding color classes
 df = pd.read_json('dataset.json')
 df['features'] = df['features']
-
 X = list(df['features'])
 Y = list(df['color'])
+files = list(df['filename'])
 print(df)
+
 # pick a random image from the dataset,
 # remove it from the training dataset and use it for resting
 import random
 testing_n = random.randint(0,len(X)-1)
 testing_image = X.pop(testing_n)
 testing_class = Y.pop(testing_n)
+testing_filename = files[testing_n]
 
+# train
 clf = linear_model.SGDClassifier()
 clf.fit(X,Y)
 
-print("Test:", testing_class, '-->', clf.predict([testing_image]))
+# test classifier on unknown image
+print("Test:", testing_filename, testing_class, '-->', clf.predict([testing_image]))
