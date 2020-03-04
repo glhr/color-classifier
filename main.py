@@ -1,11 +1,10 @@
 from skimage import io
-from sklearn.feature_extraction import image
-from skimage.transform import rescale, resize, downscale_local_mean
+from skimage.transform import resize
+from sklearn.model_selection import train_test_split
 import numpy as np
 import cv2
 import glob
 
-import numpy as np
 from sklearn import linear_model
 import pandas as pd
 import json
@@ -48,17 +47,13 @@ Y = list(df['color'])
 files = list(df['filename'])
 print(df)
 
-# pick a random image from the dataset,
-# remove it from the training dataset and use it for resting
-import random
-testing_n = random.randint(0,len(X)-1)
-testing_image = X.pop(testing_n)
-testing_class = Y.pop(testing_n)
-testing_filename = files[testing_n]
+# split dataset into training and testing
+X_train, X_test, y_train, y_test = train_test_split(
+    X, Y, test_size=0.1)
 
 # train
 clf = linear_model.SGDClassifier()
-clf.fit(X,Y)
+clf.fit(X_train,y_train)
 
-# test classifier on unknown image
-print("Test:", testing_filename, testing_class, '-->', clf.predict([testing_image]))
+# test classifier on unknown image(s) from testing dataset
+print("Test:\t", y_test, '\n-->\t', clf.predict(X_test))
