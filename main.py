@@ -25,12 +25,22 @@ def datasetToJSON():
             image = gray2rgb(image)
         elif image.shape[-1] > 3:
             image = image[:,:,:3]
-        # hsv_img = rgb2hsv(image)
-        image_downscaled = resize(image, (10,10,3))
+        # image_downscaled = resize(image, (10,10,3))
+
+        # image = rgb2hsv(image)
+        if np.max(image) > 1:
+            range = (0,255)
+        else:
+            range = (0,1)
+        histo_r = np.histogram(image[:,:,0],range=range,bins=10)[0]
+        histo_g = np.histogram(image[:,:,1],range=range,bins=10)[0]
+        histo_b = np.histogram(image[:,:,2],range=range,bins=10)[0]
+        histo = np.hstack((histo_r,histo_g,histo_b))
 
         image_dict = {
             'filename':image_filename,
-            'features':list(image_downscaled.flatten()),
+            # 'features':list(image_downscaled.flatten()),
+            'histo': list(map(int,histo)),
             'color': color
         }
         images.append(image_dict)
@@ -49,15 +59,14 @@ if not os.path.isfile('dataset.json'):
 
 # load image features and corresponding color classes
 df = pd.read_json('dataset.json')
-df['features'] = df['features']
-X = list(df['features'])
+X = list(df['histo'])
 Y = list(df['color'])
 files = list(df['filename'])
 print(df)
 
 # split dataset into training and testing
 X_train, X_test, y_train, y_test = train_test_split(
-    X, Y, test_size=0.1)
+    X, Y, test_size=0.04)
 
 # train
 clf = MultinomialNB()
