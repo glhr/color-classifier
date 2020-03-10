@@ -11,6 +11,8 @@ from sklearn.naive_bayes import MultinomialNB
 import pandas as pd
 import json
 
+from utils.segmentation import get_segmentation_mask
+
 X = []
 Y = []
 
@@ -27,6 +29,8 @@ def datasetToJSON():
             image = image[:,:,:3]
         # image_downscaled = resize(image, (10,10,3))
 
+        mask = get_segmentation_mask(image)
+
         # image = rgb2hsv(image)
         if np.max(image) > 1:
             range = (0,255)
@@ -36,6 +40,8 @@ def datasetToJSON():
         histo_g = np.histogram(image[:,:,1],range=range,bins=10)[0]
         histo_b = np.histogram(image[:,:,2],range=range,bins=10)[0]
         histo = np.hstack((histo_r,histo_g,histo_b))
+
+        io.imsave('masks/'+image_filename.split("\\")[-1].split("/")[-1],mask.astype(int))
 
         image_dict = {
             'filename':image_filename,
@@ -48,8 +54,6 @@ def datasetToJSON():
     with open('dataset.json', 'w') as json_file:
         json.dump(images , json_file)
 
-    # cv2.imshow('img',image_downscaled)
-    # cv2.waitKey(0)
 
 import os.path
 
@@ -66,7 +70,7 @@ print(df)
 
 # split dataset into training and testing
 X_train, X_test, y_train, y_test = train_test_split(
-    X, Y, test_size=0.04)
+    X, Y, test_size=0.02)
 
 # train
 clf = MultinomialNB()
