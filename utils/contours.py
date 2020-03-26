@@ -9,12 +9,29 @@ import matplotlib.pyplot as plt
 
 from skimage import measure
 from perspective_transform import apply_transform
+import scipy.ndimage as ndimage
+
 
 def get_contours(image):
-    image_slic = slic(image,n_segments=5,sigma=5)
+    image_slic = slic(image, n_segments=5, sigma=5)
     image = label2rgb(image_slic, image, kind='avg')
     mask = np.ma.masked_equal(image, np.min(image))
     return mask
+
+
+def get_masks_from_contours(image, contours):
+    masks = []
+    for contour in contours:
+        # Create an empty image to store the masked array
+        mask = np.zeros_like(image, dtype='bool')
+        # Create a contour image by using the contour coordinates rounded to their nearest integer value
+        mask[np.round(contour[:, 0]).astype('int'), np.round(contour[:, 1]).astype('int')] = 1
+        # Fill in the hole created by the contour boundary
+        mask = ndimage.binary_fill_holes(mask)
+        # Invert the mask since you want pixels outside of the region
+        # mask = ~mask
+        masks.append(mask)
+    return masks
 
 
 if __name__ == '__main__':
@@ -24,13 +41,15 @@ if __name__ == '__main__':
     if len(image.shape) < 3:
         image = gray2rgb(image)
     elif image.shape[-1] > 3:
-        image = image[:,:,0]
+        image = image[:,:,:3]
 
     if np.max(image) > 1:
         image = image/255
 
+    image_value = image[:,:,2]
+
     # Find contours at a constant value of 0.8
-    contours = measure.find_contours(image, 0.8)
+    contours = measure.find_contours(image_value, 0.8)
     print("Found {} contours".format(len(contours)))
 
     # Display the image and plot all contours found
@@ -44,3 +63,13 @@ if __name__ == '__main__':
     ax.set_xticks([])
     ax.set_yticks([])
     plt.savefig('test/contours.png')
+
+    masks = get_masks_from_contours(image_value, contours)
+
+    for i, mask in enumerate(masks):
+        if np.sum(mask.astype(np.uint8)) > 500:
+            # broadcast `mask` along the 3rd dimension to make it the same shape as `x`
+            masked = (image.copy()*255).astype(np.uint8)
+            masked[~mask,:] = 255
+
+            io.imsave("test/mask{}.png".format(i), masked)
