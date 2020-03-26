@@ -66,8 +66,8 @@ if __name__ == '__main__':
             masked = (image.copy()*255).astype(np.uint8)
             masked[~mask,:] = 255
 
-            io.imsave("test/mask{}.png".format(i), masked)
-
+    io.imsave("test/mask.png", masked)
+    ax[1].imshow(masked)
     for a in ax:
         a.axis('image')
         a.set_xticks([])

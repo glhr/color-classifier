@@ -60,12 +60,12 @@ def datasetToJSON():
         color = get_color_from_filename(image_filename)
 
         image = normalize_img(image)
-        mask = get_segmentation_mask(image)
+        # mask = get_segmentation_mask(image)
 
         #
         histo = get_rgb_histo(image, bins=HISTO_BINS)
 
-        io.imsave('masks/'+image_filename.split("\\")[-1].split("/")[-1], mask.astype(np.uint8))
+        # io.imsave('masks/'+image_filename.split("\\")[-1].split("/")[-1], mask.astype(np.uint8))
 
         image_dict = {
             'filename': image_filename,
