@@ -14,7 +14,7 @@ def get_segmentation_mask(image):
 
 
 if __name__ == '__main__':
-    image = io.imread("test/green-cropped.png")
+    image = io.imread("test/green.png")
 
     if len(image.shape) < 3:
         image = gray2rgb(image)
@@ -23,5 +23,5 @@ if __name__ == '__main__':
 
     mask = get_segmentation_mask(image)
     cv2.namedWindow('img',cv2.WINDOW_NORMAL)
-    cv2.imshow('img',mask.astype(np.uint8)*255)
+    cv2.imshow('img',image.astype(np.uint8)*255)
     cv2.waitKey(0)
