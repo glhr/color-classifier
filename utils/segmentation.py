@@ -12,8 +12,9 @@ def get_segmentation_mask(image):
     mask = np.ma.masked_equal(image, np.min(image))
     return mask
 
+
 if __name__ == '__main__':
-    image = io.imread("dataset/blue-9.png")
+    image = io.imread("test/green-cropped.png")
 
     if len(image.shape) < 3:
         image = gray2rgb(image)
