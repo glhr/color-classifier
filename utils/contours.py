@@ -53,16 +53,10 @@ if __name__ == '__main__':
     print("Found {} contours".format(len(contours)))
 
     # Display the image and plot all contours found
-    fig, ax = plt.subplots()
-    ax.imshow(image, cmap=plt.cm.gray)
-
+    fig, ax = plt.subplots(ncols=2, figsize=(8, 3))
+    ax[0].imshow(image)
     for n, contour in enumerate(contours):
-        ax.plot(contour[:, 1], contour[:, 0], linewidth=2)
-
-    ax.axis('image')
-    ax.set_xticks([])
-    ax.set_yticks([])
-    plt.savefig('test/contours.png')
+        ax[0].plot(contour[:, 1], contour[:, 0], linewidth=2)
 
     masks = get_masks_from_contours(image_value, contours)
 
@@ -73,3 +67,11 @@ if __name__ == '__main__':
             masked[~mask,:] = 255
 
             io.imsave("test/mask{}.png".format(i), masked)
+
+    for a in ax:
+        a.axis('image')
+        a.set_xticks([])
+        a.set_yticks([])
+
+    plt.tight_layout()
+    plt.savefig('test/contours_plot.png', dpi=500)

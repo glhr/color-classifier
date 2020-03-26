@@ -33,14 +33,16 @@ if __name__ == '__main__':
     image = io.imread("test/green.png")
     tform, dst = estimate_transform()
     warped = apply_transform(image, tform)
-    fig, ax = plt.subplots(nrows=2, figsize=(3, 4))
+    fig, ax = plt.subplots(ncols=2, figsize=(8, 3))
 
     ax[0].imshow(image, cmap=plt.cm.gray)
     ax[0].plot(dst[:, 0], dst[:, 1], '.r')
     ax[1].imshow(warped, cmap=plt.cm.gray)
 
     for a in ax:
-        a.axis('off')
+        a.axis('image')
+        a.set_xticks([])
+        a.set_yticks([])
 
     plt.tight_layout()
     plt.savefig('test/transform.png', dpi=500)
