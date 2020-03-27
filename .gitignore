@@ -125,4 +125,4 @@ dmypy.json
 
 masks/
 contours/
-plots-contours/
+plots_contours/
