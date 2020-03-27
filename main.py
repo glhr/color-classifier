@@ -23,15 +23,20 @@ Y = []
 HISTO_BINS = 10
 
 
-def get_rgb_histo(image, bins):
+def get_rgb_histo(image, mask, bins):
     image = rgb2hsv(image)
     if np.max(image) > 1:
         range = (0,255)
     else:
         range = (0,1)
-    histo_r = np.histogram(image[:,:,0], range=range, bins=bins, density=True)
-    histo_g = np.histogram(image[:,:,1], range=range, bins=bins, density=True)
-    histo_b = np.histogram(image[:,:,2], range=range, bins=bins, density=True)
+
+    masked_array_r = np.ma.masked_array(image[:,:,0], mask=~mask)
+    masked_array_g = np.ma.masked_array(image[:,:,1], mask=~mask)
+    masked_array_b = np.ma.masked_array(image[:,:,2], mask=~mask)
+
+    histo_r = np.histogram(masked_array_r.compressed(), range=range, bins=bins, density=True)
+    histo_g = np.histogram(masked_array_g.compressed(), range=range, bins=bins, density=True)
+    histo_b = np.histogram(masked_array_b.compressed(), range=range, bins=bins, density=True)
 
     vector = np.hstack((histo_r[0], histo_g[0], histo_b[0]))
 
@@ -60,7 +65,6 @@ def generate_dataset():
         image = io.imread(image_filename)
         print(image_filename)
 
-
         image = normalize_img(image)
 
         if np.max(image) > 1:
@@ -70,41 +74,41 @@ def generate_dataset():
             image_value = image[:,:,2]
             contours = get_contours(image_value)
             masks = get_masks_from_contours(image_value, contours)
-            masked = get_masked_image(image,masks)
-            io.imsave('contours/'+image_filename.split("\\")[-1].split("/")[-1], masked)
+            masked, mask = get_masked_image(image,masks)
+            # io.imsave('contours/'+image_filename.split("\\")[-1].split("/")[-1], masked)
+
+            histo = get_rgb_histo(masked, mask=mask, bins=HISTO_BINS)
+
+            image_dict = {
+                'filename': image_filename,
+                # 'features':list(image_downscaled.flatten()),
+                'histo': list(map(int, histo)),
+                'color': get_color_from_filename(image_filename)
+            }
+            images.append(image_dict)
         except:
             pass
 
 
-def datasetToJSON():
+def save_contours():
     images = []
     for image_filename in glob.glob("contours/*"):
         print(image_filename)
         masked = io.imread(image_filename)
 
-        histo = get_rgb_histo(masked, bins=HISTO_BINS)
+        file = image_filename.split("\\")[-1].split("/")[-1]
+        image = io.imread('dataset/'+file)
+        image = normalize_img(image)
+        fig, ax = plt.subplots(ncols=2, figsize=(8, 3))
+        ax[0].imshow(image)
+        ax[1].imshow(masked)
+        for a in ax:
+            a.axis('image')
+            a.set_xticks([])
+            a.set_yticks([])
 
-        image_dict = {
-            'filename': image_filename,
-            # 'features':list(image_downscaled.flatten()),
-            'histo': list(map(int, histo)),
-            'color': get_color_from_filename(image_filename)
-        }
-        images.append(image_dict)
-
-        # file = image_filename.split("\\")[-1].split("/")[-1]
-        # image = io.imread('dataset/'+file)
-        # image = normalize_img(image)
-        # fig, ax = plt.subplots(ncols=2, figsize=(8, 3))
-        # ax[0].imshow(image)
-        # ax[1].imshow(masked)
-        # for a in ax:
-        #     a.axis('image')
-        #     a.set_xticks([])
-        #     a.set_yticks([])
-        #
-        # plt.tight_layout()
-        # plt.savefig('plots_contours/{}.png'.format(file), dpi=300)
+        plt.tight_layout()
+        plt.savefig('plots_contours/{}.png'.format(file), dpi=300)
 
     with open('dataset.json', 'w') as json_file:
         json.dump(images, json_file)
@@ -115,7 +119,7 @@ def datasetToJSON():
 #     datasetToJSON()
 
 # generate_dataset()
-datasetToJSON()
+# datasetToJSON()
 
 # load image features and corresponding color classes
 df = pd.read_json('dataset.json')
@@ -164,9 +168,11 @@ def test_img(image_filename):
     image_value = image[:,:,2]
     contours = get_contours(image_value)
     masks = get_masks_from_contours(image_value, contours)
-    masked = get_masked_image(image,masks)
+    masked, mask = get_masked_image(image,masks)
     io.imsave('test/masked-'+image_filename.split("\\")[-1].split("/")[-1], masked)
-    histo = get_rgb_histo(masked, bins=HISTO_BINS)
+
+
+    histo = get_rgb_histo(masked, mask=mask, bins=HISTO_BINS)
 
     clf = get_model(X, Y)
     X_test = list(map(int, histo))
@@ -176,5 +182,6 @@ def test_img(image_filename):
 eval_split_dataset()
 
 # test_img("test/green.png")
+test_img("test/mask.png")
 test_img("test/green-cropped.png")
 test_img("test/green-cropped2.png")

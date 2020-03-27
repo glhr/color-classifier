@@ -46,7 +46,7 @@ def get_masked_image(image, masks):
     masked = (image.copy()*255).astype(np.uint8)
     masked[~mask,:] = 255
 
-    return masked
+    return masked, mask
 
 
 if __name__ == '__main__':
@@ -75,7 +75,7 @@ if __name__ == '__main__':
 
     masks = get_masks_from_contours(image_value, contours)
 
-    masked = get_masked_image(image, masks)
+    masked, mask = get_masked_image(image, masks)
 
     io.imsave("test/mask.png", masked)
     ax[1].imshow(masked)
