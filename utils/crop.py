@@ -4,10 +4,12 @@ except ImportError:
     from utils.contours import *
 
 try:
-    from perspective_transform import apply_transform, apply_inverse_transform
+    from perspective_transform import apply_transform
 except ImportError:
-    from utils.perspective_transform import apply_transform, apply_inverse_transform
+    from utils.perspective_transform import apply_transform
 
+from skimage.draw import polygon2mask
+import numpy as np
 
 def get_crop_from_contours(image,contours):
     masks = []
@@ -28,39 +30,19 @@ def get_crop_from_contours(image,contours):
       ] for contour in contours]
 
     crop = boxes[i]
-
-    print(crop)
-
-
-
     return crop, masked
 
 
 if __name__ == '__main__':
+
     image_orig = io.imread("test/green.png")
-    image = apply_transform(image_orig)
-    image = normalize_img(image)
-    image_value = image[:,:,2]
-    # Find contours at a constant value of 0.8
+
+    image = apply_transform(image_orig) # geometric transform
+    image = normalize_img(image)  # make sure it's RGB in range (0,1)
+    image_value = image[:,:,2]  # select a single channel for contouring
+
+    # Find contours, select best one and get crop coordinates
     contours = get_contours(image_value)
     print("Found {} contours".format(len(contours)))
     crop_coords, segmented_img = get_crop_from_contours(image, contours)
-
-    # reverse transformation
-    segmented_tf = apply_inverse_transform(segmented_img)
-    crop = apply_transform(crop_coords, coords=True)
-    cropped_img = image_orig[crop[0][1]:crop[1][1], crop[0][0]:crop[1][0]]
-
-
-    import matplotlib.pyplot as plt
-    # Display the image and plot all contours found
-    fig, ax = plt.subplots(ncols=3, figsize=(10, 3))
-    ax[0].imshow(image_orig)
-    ax[1].imshow(cropped_img)
-    ax[2].imshow(segmented_tf)
-    for a in ax:
-        a.axis('image')
-        a.set_xticks([])
-        a.set_yticks([])
-    plt.tight_layout()
-    plt.savefig('test/crop_plot.png', dpi=500)
+    print(crop_coords)

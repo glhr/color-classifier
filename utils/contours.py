@@ -1,9 +1,4 @@
 from skimage import io
-from skimage.transform import resize
-from skimage.color import rgb2hsv, gray2rgb, rgb2gray, label2rgb
-from skimage.segmentation import slic
-import cv2
-
 import numpy as np
 
 
@@ -14,7 +9,7 @@ try:
 except ImportError:
     from utils.perspective_transform import apply_transform
     from utils.img import normalize_img
-import scipy.ndimage as ndimage
+
 from skimage.draw import polygon2mask
 
 
@@ -53,7 +48,7 @@ def get_masked_image(image, masks):
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    
+
     image = io.imread("test/green.png")
     image = apply_transform(image)
 
