@@ -30,9 +30,16 @@ def apply_transform(image, tform=DEFAULT_TRANSFORM, coords=False, inverse=False)
     if not coords:
         warped = tf.warp(image, tform, output_shape=image.shape)
     else:
-        coords = tform(image)
-        warped = np.array([  [np.floor(coords[0][0]), np.floor(coords[0][1])],
-                    [np.ceil(coords[1][0]), np.ceil(coords[1][1])]],dtype=int)
+        xmin, ymin, xmax, ymax = image[0][0], image[0][1], image[1][0], image[1][1]
+        print(xmin, ymin, xmax, ymax)
+        h = ymax-ymin
+        w = xmax-xmin
+        coords = [[xmin, ymin], [xmin+w, ymin], [xmin, ymin+h], [xmin+w, ymin+h]]
+        print(coords)
+        coords = tform(coords)
+        print(coords)
+        warped = np.array([  [np.floor(np.min(coords[:,0])), np.floor(np.min(coords[:,1]))],
+                    [np.ceil(np.max(coords[:,0])), np.ceil(np.max(coords[:,1]))]],dtype=int)
         print(warped)
     return warped
 
