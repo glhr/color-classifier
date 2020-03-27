@@ -53,12 +53,11 @@ def normalize_img(image):
     return image
 
 
-def datasetToJSON():
-    images = []
+def generate_dataset():
     for image_filename in glob.glob("dataset/*"):
         image = io.imread(image_filename)
         print(image_filename)
-        color = get_color_from_filename(image_filename)
+
 
         image = normalize_img(image)
 
@@ -71,20 +70,24 @@ def datasetToJSON():
             masks = get_masks_from_contours(image_value, contours)
             masked = get_masked_image(image,masks)
             io.imsave('contours/'+image_filename.split("\\")[-1].split("/")[-1], masked)
+        except:
+            pass
 
+
+def datasetToJSON():
+    images = []
+    for image_filename in glob.glob("contours/*"):
+            print(image_filename)
+            masked = io.imread(image_filename)
             histo = get_rgb_histo(masked, bins=HISTO_BINS)
-
-            # io.imsave('masks/'+image_filename.split("\\")[-1].split("/")[-1], mask.astype(np.uint8))
 
             image_dict = {
                 'filename': image_filename,
                 # 'features':list(image_downscaled.flatten()),
                 'histo': list(map(int, histo)),
-                'color': color
+                'color': get_color_from_filename(image_filename)
             }
             images.append(image_dict)
-        except Exception:
-            pass
 
     with open('dataset.json', 'w') as json_file:
         json.dump(images, json_file)
@@ -144,9 +147,8 @@ def test_img(image_filename):
     contours = get_contours(image_value)
     masks = get_masks_from_contours(image_value, contours)
     masked = get_masked_image(image,masks)
-    io.imsave('contours/'+image_filename.split("\\")[-1].split("/")[-1], masked)
+    io.imsave('test/masked-'+image_filename.split("\\")[-1].split("/")[-1], masked)
     histo = get_rgb_histo(masked, bins=HISTO_BINS)
-
 
     clf = get_model(X, Y)
     X_test = list(map(int, histo))
