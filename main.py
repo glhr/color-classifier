@@ -13,6 +13,7 @@ import pandas as pd
 import json
 
 from utils.segmentation import get_segmentation_mask
+from utils.contours import *
 
 X = []
 Y = []
@@ -60,20 +61,30 @@ def datasetToJSON():
         color = get_color_from_filename(image_filename)
 
         image = normalize_img(image)
-        # mask = get_segmentation_mask(image)
 
-        #
-        histo = get_rgb_histo(image, bins=HISTO_BINS)
+        if np.max(image) > 1:
+            image = image/255
 
-        # io.imsave('masks/'+image_filename.split("\\")[-1].split("/")[-1], mask.astype(np.uint8))
+        try:
+            image_value = image[:,:,2]
+            contours = get_contours(image_value)
+            masks = get_masks_from_contours(image_value, contours)
+            masked = get_masked_image(image,masks)
+            io.imsave('contours/'+image_filename.split("\\")[-1].split("/")[-1], masked)
 
-        image_dict = {
-            'filename': image_filename,
-            # 'features':list(image_downscaled.flatten()),
-            'histo': list(map(int, histo)),
-            'color': color
-        }
-        images.append(image_dict)
+            histo = get_rgb_histo(masked, bins=HISTO_BINS)
+
+            # io.imsave('masks/'+image_filename.split("\\")[-1].split("/")[-1], mask.astype(np.uint8))
+
+            image_dict = {
+                'filename': image_filename,
+                # 'features':list(image_downscaled.flatten()),
+                'histo': list(map(int, histo)),
+                'color': color
+            }
+            images.append(image_dict)
+        except Exception:
+            pass
 
     with open('dataset.json', 'w') as json_file:
         json.dump(images, json_file)
@@ -83,7 +94,7 @@ def datasetToJSON():
 # if not os.path.isfile('dataset.json'):
 #     datasetToJSON()
 
-datasetToJSON()
+# datasetToJSON()
 
 # load image features and corresponding color classes
 df = pd.read_json('dataset.json')
@@ -124,19 +135,26 @@ def test_img(image_filename):
     image_orig = io.imread(image_filename)
     image = normalize_img(image_orig)
 
-
     y_test = get_color_from_filename(image_filename)
 
-    mask = get_segmentation_mask(image)
-    io.imsave('test/mask-'+image_filename.split("\\")[-1].split("/")[-1], mask.astype(np.uint8))
+    if np.max(image) > 1:
+        image = image/255
+
+    image_value = image[:,:,2]
+    contours = get_contours(image_value)
+    masks = get_masks_from_contours(image_value, contours)
+    masked = get_masked_image(image,masks)
+    io.imsave('contours/'+image_filename.split("\\")[-1].split("/")[-1], masked)
+    histo = get_rgb_histo(masked, bins=HISTO_BINS)
+
 
     clf = get_model(X, Y)
-    X_test = get_rgb_histo(image, bins=HISTO_BINS)
+    X_test = list(map(int, histo))
     predicted = clf.predict([X_test])
     print("Test:\t", y_test, '\n-->\t', predicted)
 
 eval_split_dataset()
 
-test_img("test/green.png")
+# test_img("test/green.png")
 test_img("test/green-cropped.png")
 test_img("test/green-cropped2.png")

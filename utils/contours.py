@@ -8,30 +8,45 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import measure
-from perspective_transform import apply_transform
+try:
+    from perspective_transform import apply_transform
+except ImportError:
+    from utils.perspective_transform import apply_transform
 import scipy.ndimage as ndimage
+from skimage.draw import polygon2mask
 
 
 def get_contours(image):
-    image_slic = slic(image, n_segments=5, sigma=5)
-    image = label2rgb(image_slic, image, kind='avg')
-    mask = np.ma.masked_equal(image, np.min(image))
-    return mask
+    return measure.find_contours(image, 0.8)
 
 
 def get_masks_from_contours(image, contours):
     masks = []
     for contour in contours:
-        # Create an empty image to store the masked array
-        mask = np.zeros_like(image, dtype='bool')
-        # Create a contour image by using the contour coordinates rounded to their nearest integer value
-        mask[np.round(contour[:, 0]).astype('int'), np.round(contour[:, 1]).astype('int')] = 1
-        # Fill in the hole created by the contour boundary
-        mask = ndimage.binary_fill_holes(mask)
-        # Invert the mask since you want pixels outside of the region
-        # mask = ~mask
+        # # Create an empty image to store the masked array
+        # mask = np.zeros_like(image, dtype='bool')
+        # # Create a contour image by using the contour coordinates rounded to their nearest integer value
+        # mask[np.round(contour[:, 0]).astype('int'), np.round(contour[:, 1]).astype('int')] = 1
+        # # Fill in the hole created by the contour boundary
+        # mask = ndimage.binary_fill_holes(mask)
+        # # Invert the mask since you want pixels outside of the region
+        # # mask = ~mask
+        mask = polygon2mask(image.shape, contour)
         masks.append(mask)
     return masks
+
+
+def get_masked_image(image, masks):
+    # get largest mask
+    i = np.argmax([np.sum(mask.astype(np.uint8)) for mask in masks])
+
+    if np.sum(masks[i].astype(np.uint8)) < 500:
+        return None
+    mask = masks[i]
+    masked = (image.copy()*255).astype(np.uint8)
+    masked[~mask,:] = 255
+
+    return masked
 
 
 if __name__ == '__main__':
@@ -49,7 +64,7 @@ if __name__ == '__main__':
     image_value = image[:,:,2]
 
     # Find contours at a constant value of 0.8
-    contours = measure.find_contours(image_value, 0.8)
+    contours = get_contours(image_value)
     print("Found {} contours".format(len(contours)))
 
     # Display the image and plot all contours found
@@ -60,11 +75,7 @@ if __name__ == '__main__':
 
     masks = get_masks_from_contours(image_value, contours)
 
-    for i, mask in enumerate(masks):
-        if np.sum(mask.astype(np.uint8)) > 500:
-            # broadcast `mask` along the 3rd dimension to make it the same shape as `x`
-            masked = (image.copy()*255).astype(np.uint8)
-            masked[~mask,:] = 255
+    masked = get_masked_image(image, masks)
 
     io.imsave("test/mask.png", masked)
     ax[1].imshow(masked)
