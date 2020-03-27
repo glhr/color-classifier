@@ -15,6 +15,8 @@ import json
 from utils.segmentation import get_segmentation_mask
 from utils.contours import *
 
+import matplotlib.pyplot as plt
+
 X = []
 Y = []
 
@@ -77,17 +79,32 @@ def generate_dataset():
 def datasetToJSON():
     images = []
     for image_filename in glob.glob("contours/*"):
-            print(image_filename)
-            masked = io.imread(image_filename)
-            histo = get_rgb_histo(masked, bins=HISTO_BINS)
+        print(image_filename)
+        masked = io.imread(image_filename)
 
-            image_dict = {
-                'filename': image_filename,
-                # 'features':list(image_downscaled.flatten()),
-                'histo': list(map(int, histo)),
-                'color': get_color_from_filename(image_filename)
-            }
-            images.append(image_dict)
+        histo = get_rgb_histo(masked, bins=HISTO_BINS)
+
+        image_dict = {
+            'filename': image_filename,
+            # 'features':list(image_downscaled.flatten()),
+            'histo': list(map(int, histo)),
+            'color': get_color_from_filename(image_filename)
+        }
+        images.append(image_dict)
+
+        # file = image_filename.split("\\")[-1].split("/")[-1]
+        # image = io.imread('dataset/'+file)
+        # image = normalize_img(image)
+        # fig, ax = plt.subplots(ncols=2, figsize=(8, 3))
+        # ax[0].imshow(image)
+        # ax[1].imshow(masked)
+        # for a in ax:
+        #     a.axis('image')
+        #     a.set_xticks([])
+        #     a.set_yticks([])
+        #
+        # plt.tight_layout()
+        # plt.savefig('plots_contours/{}.png'.format(file), dpi=300)
 
     with open('dataset.json', 'w') as json_file:
         json.dump(images, json_file)
@@ -97,7 +114,8 @@ def datasetToJSON():
 # if not os.path.isfile('dataset.json'):
 #     datasetToJSON()
 
-# datasetToJSON()
+# generate_dataset()
+datasetToJSON()
 
 # load image features and corresponding color classes
 df = pd.read_json('dataset.json')

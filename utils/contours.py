@@ -40,7 +40,7 @@ def get_masked_image(image, masks):
     # get largest mask
     i = np.argmax([np.sum(mask.astype(np.uint8)) for mask in masks])
 
-    if np.sum(masks[i].astype(np.uint8)) < 500:
+    if np.sum(masks[i].astype(np.uint8)) < 2000:
         return None
     mask = masks[i]
     masked = (image.copy()*255).astype(np.uint8)
