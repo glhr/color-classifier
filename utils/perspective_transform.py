@@ -24,8 +24,19 @@ def estimate_transform():
     return tform3, dst
 
 
-def apply_transform(image, tform=DEFAULT_TRANSFORM):
-    warped = tf.warp(image, tform, output_shape=image.shape)
+def apply_inverse_transform(image, tform=DEFAULT_TRANSFORM):
+    warped = tf.warp(image, tform.inverse, output_shape=image.shape)
+    return warped
+
+
+def apply_transform(image, tform=DEFAULT_TRANSFORM, coords=False):
+    if not coords:
+        warped = tf.warp(image, tform, output_shape=image.shape)
+    else:
+        coords = tform(image)
+        warped = np.array([  [np.floor(coords[0][0]), np.floor(coords[0][1])],
+                    [np.ceil(coords[1][0]), np.ceil(coords[1][1])]],dtype=int)
+        print(warped)
     return warped
 
 

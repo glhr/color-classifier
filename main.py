@@ -14,6 +14,7 @@ import json
 
 from utils.segmentation import get_segmentation_mask
 from utils.contours import *
+from utils.img import normalize_img
 
 import matplotlib.pyplot as plt
 
@@ -48,27 +49,12 @@ def get_color_from_filename(filename):
     return color
 
 
-def normalize_img(image):
-    # print(image.shape)
-    if len(image.shape) < 3:
-        image = gray2rgb(image)
-    elif image.shape[-1] > 3:
-        image = image[:,:,:3]
-    # image = resize(image, (100,100,3))
-
-    # print(image.shape)
-    return image
-
-
 def generate_dataset():
     for image_filename in glob.glob("dataset/*"):
         image = io.imread(image_filename)
         print(image_filename)
 
         image = normalize_img(image)
-
-        if np.max(image) > 1:
-            image = image/255
 
         try:
             image_value = image[:,:,2]
@@ -131,8 +117,8 @@ print(df)
 
 def get_model(X_train, y_train):
     # train
-    # clf = SGDClassifier()
-    clf = MultinomialNB()
+    clf = SGDClassifier()
+    # clf = MultinomialNB()
     clf.fit(X_train, y_train)
     return clf
 
@@ -162,8 +148,7 @@ def test_img(image_filename):
 
     y_test = get_color_from_filename(image_filename)
 
-    if np.max(image) > 1:
-        image = image/255
+
 
     image_value = image[:,:,2]
     contours = get_contours(image_value)
@@ -183,5 +168,5 @@ eval_split_dataset()
 
 # test_img("test/green.png")
 test_img("test/mask.png")
-test_img("test/green-cropped.png")
-test_img("test/green-cropped2.png")
+# test_img("test/green-cropped.png")
+# test_img("test/green-cropped2.png")

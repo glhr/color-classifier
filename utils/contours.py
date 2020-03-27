@@ -5,13 +5,15 @@ from skimage.segmentation import slic
 import cv2
 
 import numpy as np
-import matplotlib.pyplot as plt
+
 
 from skimage import measure
 try:
     from perspective_transform import apply_transform
+    from img import normalize_img
 except ImportError:
     from utils.perspective_transform import apply_transform
+    from utils.img import normalize_img
 import scipy.ndimage as ndimage
 from skimage.draw import polygon2mask
 
@@ -50,16 +52,12 @@ def get_masked_image(image, masks):
 
 
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    
     image = io.imread("test/green.png")
     image = apply_transform(image)
 
-    if len(image.shape) < 3:
-        image = gray2rgb(image)
-    elif image.shape[-1] > 3:
-        image = image[:,:,:3]
-
-    if np.max(image) > 1:
-        image = image/255
+    image = normalize_img(image)
 
     image_value = image[:,:,2]
 
