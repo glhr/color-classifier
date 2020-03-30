@@ -11,7 +11,7 @@ import json
 import sys
 sys.path.append('.')
 from utils.segmentation import get_segmentation_mask
-from utils.contours import get_contours, get_masks_from_contours, get_masked_image
+from utils.contours import get_contours, get_masks_from_contours, get_masked_image, select_best_mask, get_mask_area
 from utils.img import normalize_img, get_hsv_histo
 from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
 from utils.logger import get_logger
@@ -91,13 +91,13 @@ df = pd.read_json(PATH_TO_DATASET_JSON)
 X = list(df['histo'])
 Y = list(df['color'])
 files = list(df['filename'])
-print(df)
+# print(df)
 
 
 def get_model(X_train=X, y_train=Y):
     # train
-    clf = SGDClassifier()
-    # clf = MultinomialNB()
+    # clf = SGDClassifier()
+    clf = MultinomialNB()
     clf.fit(X_train, y_train)
     return clf
 
@@ -121,23 +121,33 @@ def eval_split_dataset():
     print("Ratio of correct predictions:", np.round(np.sum(correct)/len(X_test),2))
 
 
-def classify_img(image, save=False, filepath=None):
+def classify_img(image, select_mask='all', save=False, filepath=None):
 
     image_value = image[:,:,2]
 
     contours = get_contours(image_value)
     masks = get_masks_from_contours(image_value, contours)
-    masked, mask = get_masked_image(image, masks)
-    if save and filepath is not None:
-        io.imsave(get_working_directory()+'/test/masked-'+get_filename_from_path(filepath), masked)
 
-    histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
+    if select_mask == 'best':
+        mask = select_best_mask(image, masks)
+        masked, mask = get_masked_image(image, mask)
+        histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
+        clf = get_model()
+        X_test = list(map(int, histo))
+        return clf.predict([X_test])
+    elif select_mask == 'all':
+        X_test = []
+        clf = get_model()
+        for i, mask in enumerate(masks):
+            masked, mask = get_masked_image(image, mask)
 
-    clf = get_model()
-    X_test = list(map(int, histo))
-    predicted = clf.predict([X_test])
+            if get_mask_area(mask) > 4000:
+                histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
+                X_test.append(list(map(int, histo)))
+                if save and filepath is not None:
+                    io.imsave(get_working_directory()+'/test/masked-'+str(i)+get_filename_from_path(filepath), masked)
 
-    return predicted
+        return clf.predict(X_test)
 
 
 def test_img(image_filename):
