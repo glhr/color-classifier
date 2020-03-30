@@ -23,9 +23,9 @@ Y = []
 
 HISTO_BINS = 10
 
-PATH_TO_DATASET_JSON = 'color_classifier/dataset.json'
-PATH_TO_DATASET_IMGS = 'color_classifier/dataset/'
-PATH_TO_CONTOURS_IMGS = 'color_classifier/contours/'
+PATH_TO_DATASET_JSON = 'src/color_classifier/dataset.json'
+PATH_TO_DATASET_IMGS = 'src/color_classifier/dataset/'
+PATH_TO_CONTOURS_IMGS = 'src/color_classifier/contours/'
 
 logger = get_logger()
 
@@ -121,8 +121,8 @@ def eval_split_dataset():
     print("Ratio of correct predictions:", np.round(np.sum(correct)/len(X_test),2))
 
 
-def classify_img(image_orig, save=False, filepath=None):
-    image = normalize_img(image_orig)
+def classify_img(image, save=False, filepath=None):
+
     image_value = image[:,:,2]
 
     contours = get_contours(image_value)
@@ -142,11 +142,11 @@ def classify_img(image_orig, save=False, filepath=None):
 
 def test_img(image_filename):
     image_orig = io.imread(image_filename)
+    image = normalize_img(image_orig)
+
+    predicted = classify_img(image, save=True, filepath=image_filename)
 
     y_test = get_color_from_filename(image_filename)
-
-    predicted = classify_img(image_orig, save=True)
-
     print("Test:\t", y_test, '\n-->\t', predicted)
 
 
