@@ -1,21 +1,20 @@
 from skimage import io
-from skimage.transform import resize
-from skimage.color import rgb2hsv, gray2rgb
 from sklearn.model_selection import train_test_split
 import numpy as np
-import cv2
 import glob
-import os.path
 
 from sklearn.linear_model import SGDClassifier
 from sklearn.naive_bayes import MultinomialNB
 import pandas as pd
 import json
 
+import sys
+sys.path.append('.')
 from utils.segmentation import get_segmentation_mask
-from utils.contours import *
-from utils.img import normalize_img
-from utils.file import *
+from utils.contours import get_contours, get_masks_from_contours, get_masked_image
+from utils.img import normalize_img, get_hsv_histo
+from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
+from utils.logger import get_logger
 
 import matplotlib.pyplot as plt
 
@@ -24,36 +23,18 @@ Y = []
 
 HISTO_BINS = 10
 
+PATH_TO_DATASET_JSON = 'color_classifier/dataset.json'
+PATH_TO_DATASET_IMGS = 'color_classifier/dataset/'
+PATH_TO_CONTOURS_IMGS = 'color_classifier/contours/'
 
-def get_rgb_histo(image, mask, bins):
-    image = rgb2hsv(image)
-    if np.max(image) > 1:
-        range = (0,255)
-    else:
-        range = (0,1)
-
-    masked_array_r = np.ma.masked_array(image[:,:,0], mask=~mask)
-    masked_array_g = np.ma.masked_array(image[:,:,1], mask=~mask)
-    masked_array_b = np.ma.masked_array(image[:,:,2], mask=~mask)
-
-    histo_r = np.histogram(masked_array_r.compressed(), range=range, bins=bins, density=True)
-    histo_g = np.histogram(masked_array_g.compressed(), range=range, bins=bins, density=True)
-    histo_b = np.histogram(masked_array_b.compressed(), range=range, bins=bins, density=True)
-
-    vector = np.hstack((histo_r[0], histo_g[0], histo_b[0]))
-
-    return vector
-
-
-def get_color_from_filename(filename):
-    color = filename.split(".")[0].split("\\")[-1].split("/")[-1].split("-")[0]
-    return color
+logger = get_logger()
 
 
 def generate_dataset():
-    for image_filename in glob.glob("dataset/*"):
+    images = []
+    for image_filename in glob.glob(PATH_TO_DATASET_IMGS+"*"):
         image = io.imread(image_filename)
-        print(image_filename)
+        logger.debug(image_filename)
 
         image = normalize_img(image)
 
@@ -61,10 +42,11 @@ def generate_dataset():
             image_value = image[:,:,2]
             contours = get_contours(image_value)
             masks = get_masks_from_contours(image_value, contours)
-            masked, mask = get_masked_image(image,masks)
-            # io.imsave('contours/'+image_filename.split("\\")[-1].split("/")[-1], masked)
+            masked, mask = get_masked_image(image, masks)
+            logger.debug(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename))
+            # io.imsave(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename), masked)
 
-            histo = get_rgb_histo(masked, mask=mask, bins=HISTO_BINS)
+            histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
 
             image_dict = {
                 'filename': image_filename,
@@ -73,18 +55,20 @@ def generate_dataset():
                 'color': get_color_from_filename(image_filename)
             }
             images.append(image_dict)
-        except:
+        except Exception as e:
+            logger.exception(e)
             pass
+    with open(PATH_TO_DATASET_JSON, 'w') as json_file:
+        json.dump(images, json_file)
+        logger.info("Saved dataset to {}".format_map(PATH_TO_DATASET_JSON))
 
 
 def save_contours():
-    images = []
-    for image_filename in glob.glob("contours/*"):
+    for image_filename in glob.glob(PATH_TO_CONTOURS_IMGS+"/*"):
         print(image_filename)
         masked = io.imread(image_filename)
 
-        file = image_filename.split("\\")[-1].split("/")[-1]
-        image = io.imread('dataset/'+file)
+        image = io.imread('dataset/'+get_filename_from_path(image_filename))
         image = normalize_img(image)
         fig, ax = plt.subplots(ncols=2, figsize=(8, 3))
         ax[0].imshow(image)
@@ -95,28 +79,22 @@ def save_contours():
             a.set_yticks([])
 
         plt.tight_layout()
-        plt.savefig('plots_contours/{}.png'.format(file), dpi=300)
-
-    with open('dataset.json', 'w') as json_file:
-        json.dump(images, json_file)
+        plt.savefig('plots_contours/{}.png'.format(get_filename_from_path(image_filename, extension=False)), dpi=300)
 
 
 # if it doesn't exist create JSON file from image dataset for training
-# if not os.path.isfile('dataset.json'):
-#     datasetToJSON()
-
-# generate_dataset()
-# datasetToJSON()
+if not file_exists(PATH_TO_DATASET_JSON):
+    generate_dataset()
 
 # load image features and corresponding color classes
-df = pd.read_json('dataset.json')
+df = pd.read_json(PATH_TO_DATASET_JSON)
 X = list(df['histo'])
 Y = list(df['color'])
 files = list(df['filename'])
 print(df)
 
 
-def get_model(X_train, y_train):
+def get_model(X_train=X, y_train=Y):
     # train
     clf = SGDClassifier()
     # clf = MultinomialNB()
@@ -143,31 +121,39 @@ def eval_split_dataset():
     print("Ratio of correct predictions:", np.round(np.sum(correct)/len(X_test),2))
 
 
+def classify_img(image_orig, save=False, filepath=None):
+    image = normalize_img(image_orig)
+    image_value = image[:,:,2]
+
+    contours = get_contours(image_value)
+    masks = get_masks_from_contours(image_value, contours)
+    masked, mask = get_masked_image(image, masks)
+    if save and filepath is not None:
+        io.imsave(get_working_directory()+'/test/masked-'+get_filename_from_path(filepath), masked)
+
+    histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
+
+    clf = get_model()
+    X_test = list(map(int, histo))
+    predicted = clf.predict([X_test])
+
+    return predicted
+
+
 def test_img(image_filename):
     image_orig = io.imread(image_filename)
-    image = normalize_img(image_orig)
 
     y_test = get_color_from_filename(image_filename)
 
+    predicted = classify_img(image_orig, save=True)
 
-
-    image_value = image[:,:,2]
-    contours = get_contours(image_value)
-    masks = get_masks_from_contours(image_value, contours)
-    masked, mask = get_masked_image(image,masks)
-    io.imsave('test/masked-'+image_filename.split("\\")[-1].split("/")[-1], masked)
-
-
-    histo = get_rgb_histo(masked, mask=mask, bins=HISTO_BINS)
-
-    clf = get_model(X, Y)
-    X_test = list(map(int, histo))
-    predicted = clf.predict([X_test])
     print("Test:\t", y_test, '\n-->\t', predicted)
 
-eval_split_dataset()
 
-# test_img("test/green.png")
-test_img("test/mask.png")
-# test_img("test/green-cropped.png")
-# test_img("test/green-cropped2.png")
+if __name__ == '__main__':
+    eval_split_dataset()
+
+    # test_img("test/green.png")
+    test_img(get_working_directory()+"/test/mask.png")
+    # test_img("test/green-cropped.png")
+    # test_img("test/green-cropped2.png")
