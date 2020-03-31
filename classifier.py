@@ -121,12 +121,13 @@ def eval_split_dataset():
     print("Ratio of correct predictions:", np.round(np.sum(correct)/len(X_test),2))
 
 
-def classify_img(image, select_mask='all', save=False, filepath=None):
+def classify_img(image, masks = None, select_mask='all', save=False, filepath=None):
 
     image_value = image[:,:,2]
 
-    contours = get_contours(image_value)
-    masks = get_masks_from_contours(image_value, contours)
+    if masks is None:
+        contours = get_contours(image_value)
+        masks = get_masks_from_contours(image_value, contours)
 
     if select_mask == 'best':
         mask = select_best_mask(image, masks)
