@@ -11,7 +11,7 @@ import json
 import sys
 sys.path.append('.')
 from utils.segmentation import get_segmentation_mask
-from utils.contours import get_contours, get_masks_from_contours, get_masked_image, select_best_mask, get_mask_area
+from utils.contours import is_mask_an_object, get_contours, get_masks_from_contours, get_masked_image, select_best_mask, get_mask_area
 from utils.img import normalize_img, get_hsv_histo
 from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
 from utils.logger import get_logger
@@ -140,11 +140,12 @@ def classify_img(image, masks = None, select_mask='all', save=False, filepath=No
         X_test = []
         clf = get_model()
         for i, mask in enumerate(masks):
-            masked, mask = get_masked_image(image, mask)
+            if is_mask_an_object(mask):
+                masked, mask = get_masked_image(image, mask)
 
-            if get_mask_area(mask) > 4000:
                 histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
                 X_test.append(list(map(int, histo)))
+
                 if save and filepath is not None:
                     io.imsave(get_working_directory()+'/test/masked-'+str(i)+get_filename_from_path(filepath), masked)
 
