@@ -102,6 +102,9 @@ def get_model(X_train=X, y_train=Y):
     return clf
 
 
+clf = get_model(X, Y)
+
+
 def eval_split_dataset():
 
     # split dataset into training and testing
@@ -121,8 +124,8 @@ def eval_split_dataset():
     print("Ratio of correct predictions:", np.round(np.sum(correct)/len(X_test),2))
 
 
-def classify_img(image, masks = None, select_mask='all', save=False, filepath=None):
-
+def classify_img(image, masks=None, select_mask='all', save=False, filepath=None):
+    global clf
     image_value = image[:,:,2]
 
     if masks is None:
@@ -138,7 +141,6 @@ def classify_img(image, masks = None, select_mask='all', save=False, filepath=No
         return clf.predict([X_test])
     elif select_mask == 'all':
         X_test = []
-        clf = get_model()
         for i, mask in enumerate(masks):
             if is_mask_an_object(mask):
                 masked, mask = get_masked_image(image, mask)
