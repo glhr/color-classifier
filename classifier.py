@@ -142,14 +142,14 @@ def classify_img(image, masks=None, select_mask='all', save=False, filepath=None
     elif select_mask == 'all':
         X_test = []
         for i, mask in enumerate(masks):
-            if is_mask_an_object(mask):
-                masked, mask = get_masked_image(image, mask)
+            # if is_mask_an_object(mask):
+            masked, mask = get_masked_image(image, mask)
 
-                histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
-                X_test.append(list(map(int, histo)))
+            histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
+            X_test.append(list(map(int, histo)))
 
-                if save and filepath is not None:
-                    io.imsave(get_working_directory()+'/test/masked-'+str(i)+get_filename_from_path(filepath), masked)
+            if save and filepath is not None:
+                io.imsave(get_working_directory()+'/test/masked-'+str(i)+get_filename_from_path(filepath), masked)
 
         return clf.predict(X_test)
 
