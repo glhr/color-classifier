@@ -12,7 +12,7 @@ import sys
 sys.path.append('.')
 from utils.segmentation import get_segmentation_mask
 from utils.contours import is_mask_an_object, get_contours, get_masks_from_contours, get_masked_image, select_best_mask, get_mask_area
-from utils.img import normalize_img, get_hsv_histo
+from utils.img import normalize_img, get_hsv_histo, get_2d_image
 from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
 from utils.logger import get_logger
 
@@ -39,12 +39,13 @@ def generate_dataset():
         image = normalize_img(image)
 
         try:
-            image_value = image[:,:,2]
+            image_value = get_2d_image(image)
             contours = get_contours(image_value)
             masks = get_masks_from_contours(image_value, contours)
-            masked, mask = get_masked_image(image, masks)
+            mask = select_best_mask(image, masks, filter=False)
+            masked, mask = get_masked_image(image, mask)
             logger.debug(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename))
-            # io.imsave(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename), masked)
+            io.imsave(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename), masked)
 
             histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
 
@@ -60,7 +61,7 @@ def generate_dataset():
             pass
     with open(PATH_TO_DATASET_JSON, 'w') as json_file:
         json.dump(images, json_file)
-        logger.info("Saved dataset to {}".format_map(PATH_TO_DATASET_JSON))
+        logger.info("Saved dataset to {}".format(PATH_TO_DATASET_JSON))
 
 
 def save_contours():
@@ -85,6 +86,7 @@ def save_contours():
 # if it doesn't exist create JSON file from image dataset for training
 if not file_exists(PATH_TO_DATASET_JSON):
     generate_dataset()
+# generate_dataset()
 
 # load image features and corresponding color classes
 df = pd.read_json(PATH_TO_DATASET_JSON)
@@ -126,7 +128,7 @@ def eval_split_dataset():
 
 def classify_img(image, masks=None, select_mask='all', save=False, filepath=None):
     global clf
-    image_value = image[:,:,2]
+    image_value = get_2d_image(image)
 
     if masks is None:
         contours = get_contours(image_value)
@@ -158,7 +160,7 @@ def test_img(image_filename):
     image_orig = io.imread(image_filename)
     image = normalize_img(image_orig)
 
-    predicted = classify_img(image, save=True, filepath=image_filename)
+    predicted = classify_img(image, save=False, filepath=image_filename)
 
     y_test = get_color_from_filename(image_filename)
     print("Test:\t", y_test, '\n-->\t', predicted)
@@ -168,6 +170,6 @@ if __name__ == '__main__':
     eval_split_dataset()
 
     # test_img("test/green.png")
-    test_img(get_working_directory()+"/test/mask.png")
-    # test_img("test/green-cropped.png")
-    # test_img("test/green-cropped2.png")
+    test_img(get_working_directory()+"/test/masked-1ros.png")
+    test_img(get_working_directory()+"/test/green-cropped.png")
+    test_img(get_working_directory()+"/test/green-cropped2.png")
