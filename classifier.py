@@ -12,11 +12,13 @@ import sys
 sys.path.append('.')
 from utils.segmentation import get_segmentation_mask
 from utils.contours import is_mask_an_object, get_contours, get_masks_from_contours, get_masked_image, select_best_mask, get_mask_area
-from utils.img import normalize_img, get_hsv_histo, get_2d_image
+from utils.img import normalize_img, get_hsv_histo, get_2d_image, create_mosaic
 from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
 from utils.logger import get_logger
 
 import matplotlib.pyplot as plt
+
+import skimage
 
 X = []
 Y = []
@@ -30,9 +32,14 @@ PATH_TO_CONTOURS_IMGS = 'src/color_classifier/contours/'
 logger = get_logger()
 
 
-def generate_dataset():
+def generate_dataset(mask_method='polygon'):
+    thumbnails = []
     images = []
+    n_images = 0
     for image_filename in glob.glob(PATH_TO_DATASET_IMGS+"*"):
+        n_images += 1
+        # if n_images > 8:
+        #     break
         image = io.imread(image_filename)
         logger.debug(image_filename)
 
@@ -41,11 +48,14 @@ def generate_dataset():
         try:
             image_value = get_2d_image(image)
             contours = get_contours(image_value)
-            masks = get_masks_from_contours(image_value, contours)
+            masks = get_masks_from_contours(image_value, contours, method=mask_method)
             mask = select_best_mask(image, masks, filter=False)
             masked, mask = get_masked_image(image, mask)
             logger.debug(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename))
-            io.imsave(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename), masked)
+
+            masked_thumbnail = skimage.transform.resize(masked, output_shape=(100,100))
+            thumbnails.append(masked_thumbnail)
+            # io.imsave(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename), masked)
 
             histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
 
@@ -59,6 +69,11 @@ def generate_dataset():
         except Exception as e:
             logger.exception(e)
             pass
+    mosaic = create_mosaic(images=thumbnails, rows_first=False)
+    io.imsave(PATH_TO_CONTOURS_IMGS+mask_method+'.png', mosaic)
+    plt.figure(1)
+    plt.imshow(mosaic)
+    plt.show()
     with open(PATH_TO_DATASET_JSON, 'w') as json_file:
         json.dump(images, json_file)
         logger.info("Saved dataset to {}".format(PATH_TO_DATASET_JSON))
