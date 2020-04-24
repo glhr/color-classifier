@@ -11,7 +11,7 @@ import json
 import sys
 sys.path.append('.')
 from utils.segmentation import get_segmentation_mask
-from utils.contours import is_mask_an_object, get_contours, get_masks_from_contours, get_masked_image, select_best_mask, get_mask_area
+from utils.contours import get_contours, Object, select_best_object
 from utils.img import normalize_img, get_hsv_histo, get_2d_image, create_mosaic
 from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
 from utils.logger import get_logger
@@ -46,15 +46,18 @@ def generate_dataset(mask_method='polygon'):
         image = normalize_img(image)
 
         try:
+            image = skimage.transform.resize(image, output_shape=(100,100))
             image_value = get_2d_image(image)
+
             contours = get_contours(image_value)
-            masks = get_masks_from_contours(image_value, contours, method=mask_method)
-            mask = select_best_mask(image, masks, filter=False)
-            masked, mask = get_masked_image(image, mask)
+            objects = [Object(contour, image, method=mask_method) for contour in contours]
+            object = select_best_object(objects, filter=False)
+            mask = object.mask
+            masked = object.get_masked_image()
             logger.debug(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename))
 
-            masked_thumbnail = skimage.transform.resize(masked, output_shape=(100,100))
-            thumbnails.append(masked_thumbnail)
+
+            thumbnails.append(masked)
             # io.imsave(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename), masked)
 
             histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
@@ -101,7 +104,8 @@ def save_contours():
 # if it doesn't exist create JSON file from image dataset for training
 if not file_exists(PATH_TO_DATASET_JSON):
     generate_dataset()
-# generate_dataset()
+# generate_dataset(mask_method='polygon')
+# generate_dataset(mask_method='binary_fill')
 
 # load image features and corresponding color classes
 df = pd.read_json(PATH_TO_DATASET_JSON)
@@ -141,26 +145,28 @@ def eval_split_dataset():
     print("Ratio of correct predictions:", np.round(np.sum(correct)/len(X_test),2))
 
 
-def classify_img(image, masks=None, select_mask='all', save=False, filepath=None):
+def classify_img(image, objects=None, select_mask='all', save=False, filepath=None):
     global clf
     image_value = get_2d_image(image)
 
-    if masks is None:
+    if objects is None:
         contours = get_contours(image_value)
-        masks = get_masks_from_contours(image_value, contours)
+        objects = [Object(contour, image) for contour in contours]
 
     if select_mask == 'best':
-        mask = select_best_mask(image, masks)
-        masked, mask = get_masked_image(image, mask)
+        object = select_best_object(objects, filter=False)
+        masked = object.get_masked_image()
+        mask = object.mask
         histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
         clf = get_model()
         X_test = list(map(int, histo))
         return clf.predict([X_test])
     elif select_mask == 'all':
         X_test = []
-        for i, mask in enumerate(masks):
+        for i, object in enumerate(objects):
             # if is_mask_an_object(mask):
-            masked, mask = get_masked_image(image, mask)
+            masked = object.get_masked_image()
+            mask = object.mask
 
             histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
             X_test.append(list(map(int, histo)))
