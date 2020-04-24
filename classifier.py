@@ -17,8 +17,6 @@ from utils.logger import get_logger
 
 import matplotlib.pyplot as plt
 
-import skimage
-
 X = []
 Y = []
 
@@ -42,11 +40,9 @@ def generate_dataset(mask_method='polygon'):
         image = io.imread(image_filename)
         logger.debug(image_filename)
 
-        image = normalize_img(image)
-
         try:
-            image = skimage.transform.resize(image, output_shape=(100,100))
-            image_value = get_2d_image(image)
+            image = normalize_img(image, resize_shape=(100,100))
+            image_value = get_2d_image(image, equalize_histo=False)
 
             contours = get_contours(image_value)
             objects = [Object(contour, image, method=mask_method) for contour in contours]
@@ -70,7 +66,7 @@ def generate_dataset(mask_method='polygon'):
             logger.exception(e)
             pass
     mosaic = create_mosaic(images=thumbnails, rows_first=False)
-    io.imsave(PATH_TO_CONTOURS_IMGS+mask_method+'.png', mosaic)
+    # io.imsave(PATH_TO_CONTOURS_IMGS+mask_method+'.png', mosaic)
     plt.figure(1)
     plt.imshow(mosaic)
     plt.show()
@@ -101,7 +97,7 @@ def save_contours():
 # if it doesn't exist create JSON file from image dataset for training
 if not file_exists(PATH_TO_DATASET_JSON):
     generate_dataset()
-# generate_dataset(mask_method='polygon')
+generate_dataset(mask_method='polygon')
 # generate_dataset(mask_method='binary_fill')
 
 # load image features and corresponding color classes
