@@ -10,9 +10,8 @@ import json
 
 import sys
 sys.path.append('.')
-from utils.segmentation import get_segmentation_mask
 from utils.contours import get_contours, Object, select_best_object
-from utils.img import normalize_img, get_hsv_histo, get_2d_image, create_mosaic
+from utils.img import normalize_img, get_feature_vector, get_2d_image, create_mosaic
 from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
 from utils.logger import get_logger
 
@@ -52,20 +51,18 @@ def generate_dataset(mask_method='polygon'):
             contours = get_contours(image_value)
             objects = [Object(contour, image, method=mask_method) for contour in contours]
             object = select_best_object(objects, filter=False)
-            mask = object.mask
-            masked = object.get_masked_image()
+            mask = object.get_mask(type=bool)
+
             logger.debug(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename))
 
-
+            masked = object.get_masked_image()
             thumbnails.append(masked)
             # io.imsave(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename), masked)
-
-            histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
 
             image_dict = {
                 'filename': image_filename,
                 # 'features':list(image_downscaled.flatten()),
-                'histo': list(map(int, histo)),
+                'histo': get_feature_vector(image, mask=mask, bins=HISTO_BINS),
                 'color': get_color_from_filename(image_filename)
             }
             images.append(image_dict)
@@ -116,7 +113,10 @@ files = list(df['filename'])
 
 
 def get_model(X_train=X, y_train=Y):
-    # train
+    """
+    Given a list of feature vectors X, and a list of ground truth classes,
+    train the linear classifier and return the model
+    """
     # clf = SGDClassifier()
     clf = MultinomialNB()
     clf.fit(X_train, y_train)
@@ -145,7 +145,12 @@ def eval_split_dataset():
     print("Ratio of correct predictions:", np.round(np.sum(correct)/len(X_test),2))
 
 
-def classify_img(image, objects=None, select_mask='all', save=False, filepath=None):
+def classify_objects(image, objects=None, save=False, filepath=None):
+    """
+    Given a list of n objects, return a list of n corresponding classes.
+    If no object list is provided, the objects are first generated from contours in the image
+    The classification is done using the globally defined model (clf)
+    """
     global clf
     image_value = get_2d_image(image)
 
@@ -153,35 +158,23 @@ def classify_img(image, objects=None, select_mask='all', save=False, filepath=No
         contours = get_contours(image_value)
         objects = [Object(contour, image) for contour in contours]
 
-    if select_mask == 'best':
-        object = select_best_object(objects, filter=False)
-        masked = object.get_masked_image()
-        mask = object.mask
-        histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
-        clf = get_model()
-        X_test = list(map(int, histo))
-        return clf.predict([X_test])
-    elif select_mask == 'all':
-        X_test = []
-        for i, object in enumerate(objects):
-            # if is_mask_an_object(mask):
+    X_test = []
+    for i, object in enumerate(objects):
+        mask = object.get_mask(type=bool)
+        X_test.append(get_feature_vector(image, mask=mask, bins=HISTO_BINS))
+
+        if save and filepath is not None:
             masked = object.get_masked_image()
-            mask = object.mask
+            io.imsave(get_working_directory()+'/test/masked-'+str(i)+get_filename_from_path(filepath), masked)
 
-            histo = get_hsv_histo(masked, mask=mask, bins=HISTO_BINS)
-            X_test.append(list(map(int, histo)))
-
-            if save and filepath is not None:
-                io.imsave(get_working_directory()+'/test/masked-'+str(i)+get_filename_from_path(filepath), masked)
-
-        return clf.predict(X_test)
+    return clf.predict(X_test)
 
 
 def test_img(image_filename):
     image_orig = io.imread(image_filename)
     image = normalize_img(image_orig)
 
-    predicted = classify_img(image, save=False, filepath=image_filename)
+    predicted = classify_objects(image, save=False, filepath=image_filename)
 
     y_test = get_color_from_filename(image_filename)
     print("Test:\t", y_test, '\n-->\t', predicted)
