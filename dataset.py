@@ -33,10 +33,16 @@ def generate_dataset(mask_method='polygon',
             image = normalize_img(image, resize_shape=resize_shape)
             image_value = get_2d_image(image, equalize_histo=equalize_histo)
 
-            contours = get_contours(image_value)
-            objects = [Object(contour, image, method=mask_method) for contour in contours]
-            if len(objects):
-                object = select_best_object(objects, constraints=None)
+            best_objects = []
+            for level in [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
+                contours = get_contours(image_value, level=level)
+                objects = [Object(contour, image, method=mask_method) for contour in contours]
+                if len(objects):
+                    object = select_best_object(objects, constraints=None)
+                    best_objects.append(object)
+
+            if len(best_objects):
+                object = select_best_object(best_objects, constraints=None)
                 mask = object.get_mask(type=bool)
 
                 masked = object.get_masked_image()
