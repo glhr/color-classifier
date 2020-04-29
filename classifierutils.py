@@ -1,5 +1,6 @@
 import pandas as pd
 import json
+import numpy as np
 
 from sklearn import preprocessing
 
@@ -16,29 +17,67 @@ HISTO_BINS = 10
 
 logger = get_logger()
 
+classifier_params = {
+    'MLPClassifier': {
+        'solver': 'lbfgs'
+    },
+    'MultinomialNB': {
+        'alpha': 0.5,
+        'fit_prior': False
+    },
+    'BernoulliNB': {
+        'binarize': 0.4,
+        'fit_prior': False
+    }
+}
+
+#
+# classifier_dict = {
+#     'linear': {
+#         'SGDClassifier': SGDClassifier,
+#         'Perceptron': Perceptron,
+#         'PassiveAggressiveClassifier': PassiveAggressiveClassifier,
+#         },
+#     'proba': {
+#         'MultinomialNB': MultinomialNB,
+#         'BernoulliNB': BernoulliNB
+#     },
+#     'neural': {
+#         'MLPClassifier': MLPClassifier
+#     }
+# }
 
 classifier_dict = {
-    'MultinomialNB': MultinomialNB,
-    'SGDClassifier': SGDClassifier,
-    'Perceptron': Perceptron,
-    'PassiveAggressiveClassifier': PassiveAggressiveClassifier,
-    'BernoulliNB': BernoulliNB
-    # 'MLPClassifier': MLPClassifier
+        'SGDClassifier': SGDClassifier,
+        'Perceptron': Perceptron,
+        'PassiveAggressiveClassifier': PassiveAggressiveClassifier,
+        'MultinomialNB': MultinomialNB,
+        'BernoulliNB': BernoulliNB,
+        'MLPClassifier': MLPClassifier
 }
+
+
+def standardize_data(X_train, classifier):
+
+    if classifier in ['SGDClassifier', 'Perceptron']:
+        X_train = preprocessing.scale(X_train)
+    elif classifier in ['BernoulliNB', 'MultinomialNB']:
+        X_train = preprocessing.minmax_scale(X_train)
+        print(np.min(X_train), np.max(X_train))
+    return X_train
 
 
 def get_model(X_train,
               y_train,
               classifier='MultinomialNB',
-              standardize=False,
               debug=False):
     """
     Given a list of feature vectors X, and a list of ground truth classes,
     train the linear classifier and return the model
     """
-    if standardize and classifier=='SGDClassifier':
-        X_train = preprocessing.scale(X_train)
     clf = classifier_dict[classifier]()
+    if classifier in classifier_params:
+        clf.set_params(**classifier_params[classifier])
     clf.fit(X_train, y_train)
     if debug:
         logger.debug(clf.get_params())
@@ -65,5 +104,6 @@ def load_dataset(path=PATH_TO_DATASET_JSON):
     X = list(df['histo'])
     Y = list(df['color'])
     files = list(df['filename'])
+    print(np.min(X), np.max(X))
     # print(df)
     return X, Y
