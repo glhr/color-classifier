@@ -18,7 +18,7 @@ X, Y = load_dataset()
 
 def eval_loo(classifier):
     logger.debug("{} classifier".format(classifier))
-    clf = get_model(X, Y, classifier=classifier, standardize=True)
+    clf = get_model(X, Y, classifier=classifier, standardize=True, debug=True)
     loo = LeaveOneOut()   # Leave-One-Out cross-validator
     cv_generator = loo.split(X)  # generates indices to split data into training & test set
     scores = cross_val_score(clf, X, Y, cv=cv_generator)  # list of accuracy score for each split

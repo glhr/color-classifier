@@ -27,7 +27,11 @@ classifier_dict = {
 }
 
 
-def get_model(X_train, y_train, classifier='MultinomialNB', standardize=False):
+def get_model(X_train,
+              y_train,
+              classifier='MultinomialNB',
+              standardize=False,
+              debug=False):
     """
     Given a list of feature vectors X, and a list of ground truth classes,
     train the linear classifier and return the model
@@ -36,6 +40,8 @@ def get_model(X_train, y_train, classifier='MultinomialNB', standardize=False):
         X_train = preprocessing.scale(X_train)
     clf = classifier_dict[classifier]()
     clf.fit(X_train, y_train)
+    if debug:
+        logger.debug(clf.get_params())
     return clf
 
 
