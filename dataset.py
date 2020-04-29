@@ -23,11 +23,13 @@ def generate_dataset(mask_method='polygon',
 
     images = []
     n_images = 0
-    mosaics = dict()
+    mosaics_masked = dict()
+    mosaics_orig = dict()
 
     for color in ['green','blue','red','orange','yellow','black','brown','purple']:
     # for color in ['purple']:
-        thumbnails = []
+        thumbnails_masked = []
+        thumbnails_orig = []
         for image_filename in glob.glob(img_path+color+"*"):
             n_images += 1
             # if n_images > 8:
@@ -52,7 +54,8 @@ def generate_dataset(mask_method='polygon',
                     mask = object.get_mask(type=bool)
 
                     masked = object.get_masked_image()
-                    thumbnails.append(masked)
+                    thumbnails_masked.append(masked)
+                    thumbnails_orig.append(image)
 
                     # logger.debug(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename))
                     # io.imsave(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename), masked)
@@ -67,12 +70,14 @@ def generate_dataset(mask_method='polygon',
             except Exception as e:
                 logger.exception(e)
                 pass
-        mosaics[color] = create_mosaic(images=thumbnails, rows_first=False)
-        save_image(mosaics[color], PATH_TO_CONTOURS_IMGS+color+'.png')
+        mosaics_masked[color] = create_mosaic(images=thumbnails_masked, rows_first=False)
+        mosaics_orig[color] = create_mosaic(images=thumbnails_orig, rows_first=False)
+        save_image(mosaics_masked[color], PATH_TO_CONTOURS_IMGS+color+'.png')
+        save_image(mosaics_orig[color], PATH_TO_CONTOURS_IMGS+color+'_orig.png')
         # plt.figure(1)
         # plt.imshow(mosaics[color])
         # plt.show()
-        save_dataset(images)
+    save_dataset(images)
 
 
 if __name__ == '__main__':
