@@ -25,8 +25,8 @@ def generate_dataset(mask_method='polygon',
     n_images = 0
     mosaics = dict()
 
-    for color in ['green','blue','red','orange','yellow','black']:
-    # for color in ['yellow']:
+    for color in ['green','blue','red','orange','yellow','black','brown','purple']:
+    # for color in ['purple']:
         thumbnails = []
         for image_filename in glob.glob(img_path+color+"*"):
             n_images += 1
