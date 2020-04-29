@@ -2,8 +2,9 @@ from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.model_selection import LeaveOneOut
 import numpy as np
 
-from sklearn.linear_model import SGDClassifier
-from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import SGDClassifier, Perceptron, PassiveAggressiveClassifier
+from sklearn.naive_bayes import MultinomialNB, BernoulliNB
+from sklearn.neural_network import MLPClassifier
 import pandas as pd
 
 import sys
@@ -22,7 +23,6 @@ if not file_exists(PATH_TO_DATASET_JSON):
     PATH_TO_DATASET_JSON = PATH_TO_DATASET_JSON.split('/')[-1]  # try alternative path
     if not file_exists(PATH_TO_DATASET_JSON):
         raise FileNotFoundError("no dataset.json found, run generate_dataset() from classifier.py")
-# generate_dataset(mask_method='binary_fill')
 
 # load image features and corresponding color classes
 df = pd.read_json(PATH_TO_DATASET_JSON)
@@ -31,16 +31,22 @@ Y = list(df['color'])
 files = list(df['filename'])
 # print(df)
 
+classifier_dict = {
+    'MultinomialNB': MultinomialNB,
+    'SGDClassifier': SGDClassifier,
+    'Perceptron': Perceptron,
+    'PassiveAggressiveClassifier': PassiveAggressiveClassifier,
+    'BernoulliNB': BernoulliNB,
+    'MLPClassifier': MLPClassifier
+}
+
 
 def get_model(X_train=X, y_train=Y, classifier='MultinomialNB'):
     """
     Given a list of feature vectors X, and a list of ground truth classes,
     train the linear classifier and return the model
     """
-    if classifier == 'SGDClassifier':
-        clf = SGDClassifier()
-    elif classifier == 'MultinomialNB':
-        clf = MultinomialNB()
+    clf = classifier_dict[classifier]()
     clf.fit(X_train, y_train)
     return clf
 
@@ -57,6 +63,12 @@ def eval_loo(classifier):
 
 
 if __name__ == '__main__':
-    classifiers = ['MultinomialNB', 'SGDClassifier']
+    classifiers = [
+        'MultinomialNB',
+        'SGDClassifier',
+        'Perceptron',
+        'PassiveAggressiveClassifier',
+        'BernoulliNB'
+    ]
     for classifier in classifiers:
         eval_loo(classifier)
