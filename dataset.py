@@ -3,15 +3,16 @@ import glob
 
 from utils.file import get_color_from_filename
 from utils.contours import get_contours, Object, select_best_object
-from utils.img import normalize_img, get_feature_vector, get_2d_image, create_mosaic, load_image
+from utils.img import save_image, normalize_img, get_feature_vector, get_2d_image, create_mosaic, load_image
 
 try:
-    from .classifierutils import save_dataset, logger, PATH_TO_DATASET_JSON, PATH_TO_DATASET_IMGS
+    from .classifierutils import save_dataset, logger, PATH_TO_CONTOURS_IMGS, PATH_TO_DATASET_JSON, PATH_TO_DATASET_IMGS
 except ImportError:
     import sys
     sys.path.append('.')
-    from classifierutils import save_dataset, logger, PATH_TO_DATASET_JSON, PATH_TO_DATASET_IMGS
+    from classifierutils import save_dataset, logger, PATH_TO_CONTOURS_IMGS, PATH_TO_DATASET_JSON, PATH_TO_DATASET_IMGS
 
+import numpy as np
 
 def generate_dataset(mask_method='polygon',
                      resize_shape=(100, 100),
@@ -19,54 +20,59 @@ def generate_dataset(mask_method='polygon',
                      equalize_histo=False,
                      img_path=PATH_TO_DATASET_IMGS,
                      output_path=PATH_TO_DATASET_JSON):
-    thumbnails = []
+
     images = []
     n_images = 0
-    for image_filename in glob.glob(img_path+"*"):
-        n_images += 1
-        # if n_images > 8:
-        #     break
-        image = load_image(image_filename)
-        logger.debug(image_filename)
+    mosaics = dict()
 
-        try:
-            image = normalize_img(image, resize_shape=resize_shape)
-            image_value = get_2d_image(image, equalize_histo=equalize_histo)
+    for color in ['green','blue','red','orange','yellow','black']:
+    # for color in ['yellow']:
+        thumbnails = []
+        for image_filename in glob.glob(img_path+color+"*"):
+            n_images += 1
+            # if n_images > 8:
+            #     break
+            image = load_image(image_filename)
+            logger.debug(image_filename)
 
-            best_objects = []
-            for level in [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
-                contours = get_contours(image_value, level=level)
-                objects = [Object(contour, image, method=mask_method) for contour in contours]
-                if len(objects):
-                    object = select_best_object(objects, constraints=None)
-                    best_objects.append(object)
+            try:
+                image = normalize_img(image, resize_shape=resize_shape)
+                image_value = get_2d_image(image, equalize_histo=equalize_histo)
 
-            if len(best_objects):
-                object = select_best_object(best_objects, constraints=None)
-                mask = object.get_mask(type=bool)
+                best_objects = []
+                for level in np.linspace(0.05, 1, 19, endpoint=False):
+                    contours = get_contours(image_value, level=level)
+                    objects = [Object(contour, image, method=mask_method) for contour in contours]
+                    if len(objects):
+                        object = select_best_object(objects, constraints=None)
+                        best_objects.append(object)
 
-                masked = object.get_masked_image()
-                thumbnails.append(masked)
+                if len(best_objects):
+                    object = select_best_object(best_objects, constraints=None)
+                    mask = object.get_mask(type=bool)
 
-                # logger.debug(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename))
-                # io.imsave(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename), masked)
+                    masked = object.get_masked_image()
+                    thumbnails.append(masked)
 
-                image_dict = {
-                    'filename': image_filename,
-                    # 'features':list(image_downscaled.flatten()),
-                    'histo': get_feature_vector(image, mask=mask, bins=histo_bins),
-                    'color': get_color_from_filename(image_filename)
-                }
-                images.append(image_dict)
-        except Exception as e:
-            logger.exception(e)
-            pass
-    mosaic = create_mosaic(images=thumbnails, rows_first=False)
-    # io.imsave(PATH_TO_CONTOURS_IMGS+mask_method+'.png', mosaic)
-    plt.figure(1)
-    plt.imshow(mosaic)
-    plt.show()
-    save_dataset(images)
+                    # logger.debug(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename))
+                    # io.imsave(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename), masked)
+
+                    image_dict = {
+                        'filename': image_filename,
+                        # 'features':list(image_downscaled.flatten()),
+                        'histo': get_feature_vector(image, mask=mask, bins=histo_bins),
+                        'color': get_color_from_filename(image_filename)
+                    }
+                    images.append(image_dict)
+            except Exception as e:
+                logger.exception(e)
+                pass
+        mosaics[color] = create_mosaic(images=thumbnails, rows_first=False)
+        save_image(mosaics[color], PATH_TO_CONTOURS_IMGS+color+'.png')
+        # plt.figure(1)
+        # plt.imshow(mosaics[color])
+        # plt.show()
+        # save_dataset(images)
 
 
 if __name__ == '__main__':
