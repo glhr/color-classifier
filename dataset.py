@@ -72,7 +72,7 @@ def generate_dataset(mask_method='polygon',
         # plt.figure(1)
         # plt.imshow(mosaics[color])
         # plt.show()
-        # save_dataset(images)
+        save_dataset(images)
 
 
 if __name__ == '__main__':
