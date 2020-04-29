@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import glob
 
-from utils.file import get_color_from_filename
+from utils.file import get_color_from_filename, file_exists
 from utils.contours import get_contours, Object, select_best_object
 from utils.img import save_image, normalize_img, get_feature_vector, get_2d_image, create_mosaic, load_image
 
@@ -17,9 +17,17 @@ import numpy as np
 def generate_dataset(mask_method='polygon',
                      resize_shape=(100, 100),
                      histo_bins=10,
+                     histo_channels='hsv',
                      equalize_histo=False,
                      img_path=PATH_TO_DATASET_IMGS,
-                     output_path=PATH_TO_DATASET_JSON):
+                     output_path=PATH_TO_DATASET_JSON,
+                     overwrite_existing=False):
+
+    output_path = "{}-{}-{}-{}.json".format(output_path.split('.')[-2], histo_channels, histo_bins, 'eq' if equalize_histo else '')
+
+    if not overwrite_existing and file_exists(output_path):
+        logger.info("{} already exists, no new dataset generated".format(output_path))
+        return
 
     images = []
     n_images = 0
@@ -63,7 +71,10 @@ def generate_dataset(mask_method='polygon',
                     image_dict = {
                         'filename': image_filename,
                         # 'features':list(image_downscaled.flatten()),
-                        'histo': get_feature_vector(image, mask=mask, bins=histo_bins),
+                        'histo': get_feature_vector(image,
+                                                    mask=mask,
+                                                    bins=histo_bins,
+                                                    channels=histo_channels),
                         'color': get_color_from_filename(image_filename)
                     }
                     images.append(image_dict)
@@ -77,21 +88,31 @@ def generate_dataset(mask_method='polygon',
         # plt.figure(1)
         # plt.imshow(mosaics[color])
         # plt.show()
-    save_dataset(images)
+
+    save_dataset(images, output_path)
 
 
 if __name__ == '__main__':
 
-    settings = {
-        'mask_method': 'polygon',
-        'resize_shape': (100, 100),
-        'histo_bins': 10,
-        'equalize_histo': False,
-    }
+    settings_list = [
+        {
+            'histo_bins': 10,
+            'equalize_histo': True,
+            'histo_channels': 'hsv'
+        },
+        {
+            'histo_bins': 20,
+            'equalize_histo': False,
+            'histo_channels': 'hsv'
+        },
+        {
+            'histo_bins': 20,
+            'equalize_histo': False,
+            'histo_channels': 'rgb'
+        },
+    ]
 
-    generate_dataset(mask_method=settings['mask_method'],
-                     resize_shape=settings['resize_shape'],
-                     histo_bins=settings['histo_bins'],
-                     equalize_histo=settings['equalize_histo'],
-                     img_path=PATH_TO_DATASET_IMGS,
-                     output_path=PATH_TO_DATASET_JSON)
+    for settings in settings_list:
+        generate_dataset(img_path=PATH_TO_DATASET_IMGS,
+                         output_path=PATH_TO_DATASET_JSON,
+                         **settings,)

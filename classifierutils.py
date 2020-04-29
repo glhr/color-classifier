@@ -10,9 +10,9 @@ from sklearn.neural_network import MLPClassifier
 
 from utils.logger import get_logger
 
-PATH_TO_DATASET_JSON = 'src/color_classifier/dataset.json'
-PATH_TO_DATASET_IMGS = 'src/color_classifier/dataset/'
-PATH_TO_CONTOURS_IMGS = 'src/color_classifier/contours/'
+PATH_TO_DATASET_JSON = 'src/color_classifier/dataset_json/dataset-hsv-10.json'
+PATH_TO_DATASET_IMGS = 'src/color_classifier/dataset_img/'
+PATH_TO_CONTOURS_IMGS = 'src/color_classifier/dataset_plots/'
 HISTO_BINS = 10
 
 logger = get_logger()
@@ -26,7 +26,7 @@ classifier_params = {
         'fit_prior': False
     },
     'BernoulliNB': {
-        'binarize': 0.4,
+        'binarize': 0.5,
         'fit_prior': False
     }
 }
@@ -63,7 +63,7 @@ def standardize_data(X_train, classifier):
         X_train = preprocessing.scale(X_train)
     elif classifier in ['BernoulliNB', 'MultinomialNB']:
         X_train = preprocessing.minmax_scale(X_train)
-        print(np.min(X_train), np.max(X_train))
+    # print(np.min(X_train), np.max(X_train))
     return X_train
 
 
@@ -78,6 +78,8 @@ def get_model(X_train,
     clf = classifier_dict[classifier]()
     if classifier in classifier_params:
         clf.set_params(**classifier_params[classifier])
+
+    X_train = standardize_data(X_train, classifier)
     clf.fit(X_train, y_train)
     if debug:
         logger.debug(clf.get_params())
@@ -100,10 +102,10 @@ def save_dataset(images, output_path=PATH_TO_DATASET_JSON):
 
 def load_dataset(path=PATH_TO_DATASET_JSON):
     # load image features and corresponding color classes
-    df = pd.read_json(PATH_TO_DATASET_JSON)
+    df = pd.read_json(path)
     X = list(df['histo'])
     Y = list(df['color'])
     files = list(df['filename'])
-    print(np.min(X), np.max(X))
+    # print(np.min(X), np.max(X))
     # print(df)
     return X, Y

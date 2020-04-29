@@ -4,22 +4,15 @@ from sklearn.model_selection import LeaveOneOut
 import sys
 sys.path.append('.')
 
-from classifierutils import logger, standardize_data, load_dataset, get_model, classifier_dict, PATH_TO_DATASET_JSON
-from utils.file import file_exists
+from classifierutils import logger, classifier_params, standardize_data, load_dataset, classifier_dict
 
 
-if not file_exists(PATH_TO_DATASET_JSON):
-    PATH_TO_DATASET_JSON = PATH_TO_DATASET_JSON.split('/')[-1]  # try alternative path
-    if not file_exists(PATH_TO_DATASET_JSON):
-        raise FileNotFoundError("no dataset.json found, run generate_dataset() from classifier.py")
-
-X_orig, Y = load_dataset()
-
-
-def eval_loo(classifier):
-    X = X_orig
+def eval_loo(X, Y, classifier):
     logger.debug("{} classifier".format(classifier))
-    clf = get_model(X, Y, classifier=classifier, debug=True)
+    clf = classifier_dict[classifier]()
+    if classifier in classifier_params:
+        clf.set_params(**classifier_params[classifier])
+        logger.debug(clf.get_params())
 
     X = standardize_data(X, classifier)
 
@@ -40,6 +33,10 @@ if __name__ == '__main__':
     # ]
     # classifiers = list(classifier_dict.keys())
     classifiers = ['SGDClassifier','BernoulliNB','MultinomialNB']
-    logger.info("Dataset size: {}".format(len(X_orig)))
-    for classifier in classifiers:
-        eval_loo(classifier)
+    import glob
+    for dataset in glob.glob('src/color_classifier/dataset_json/*.json'):
+        logger.info(dataset)
+        X, Y = load_dataset(path=dataset)
+        logger.info("Dataset size: {}".format(len(X)))
+        for classifier in classifiers:
+            eval_loo(X, Y, classifier)
