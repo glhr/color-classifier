@@ -1,144 +1,22 @@
 from skimage import io
-from sklearn.model_selection import train_test_split
-import numpy as np
-import glob
 
-from sklearn.linear_model import SGDClassifier
-from sklearn.naive_bayes import MultinomialNB
-import pandas as pd
-import json
-
-import sys
-sys.path.append('.')
-from utils.contours import get_contours, Object, select_best_object
-from utils.img import normalize_img, get_feature_vector, get_2d_image, create_mosaic
+from utils.img import normalize_img, get_2d_image, get_feature_vector
+from utils.contours import get_contours, Object
 from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
-from utils.logger import get_logger
-
-import matplotlib.pyplot as plt
+from .classifierutils import logger, load_dataset, get_model, PATH_TO_DATASET_JSON, HISTO_BINS
+from .dataset import generate_dataset
 
 X = []
 Y = []
 
-HISTO_BINS = 10
-
-PATH_TO_DATASET_JSON = 'src/color_classifier/dataset.json'
-PATH_TO_DATASET_IMGS = 'src/color_classifier/dataset/'
-PATH_TO_CONTOURS_IMGS = 'src/color_classifier/contours/'
-
-logger = get_logger()
-
-
-def generate_dataset(mask_method='polygon'):
-    thumbnails = []
-    images = []
-    n_images = 0
-    for image_filename in glob.glob(PATH_TO_DATASET_IMGS+"*"):
-        n_images += 1
-        # if n_images > 8:
-        #     break
-        image = io.imread(image_filename)
-        logger.debug(image_filename)
-
-        try:
-            image = normalize_img(image, resize_shape=(100,100))
-            image_value = get_2d_image(image, equalize_histo=False)
-
-            contours = get_contours(image_value)
-            objects = [Object(contour, image, method=mask_method) for contour in contours]
-            object = select_best_object(objects, filter=False)
-            mask = object.get_mask(type=bool)
-
-            logger.debug(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename))
-
-            masked = object.get_masked_image()
-            thumbnails.append(masked)
-            # io.imsave(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename), masked)
-
-            image_dict = {
-                'filename': image_filename,
-                # 'features':list(image_downscaled.flatten()),
-                'histo': get_feature_vector(image, mask=mask, bins=HISTO_BINS),
-                'color': get_color_from_filename(image_filename)
-            }
-            images.append(image_dict)
-        except Exception as e:
-            logger.exception(e)
-            pass
-    mosaic = create_mosaic(images=thumbnails, rows_first=False)
-    # io.imsave(PATH_TO_CONTOURS_IMGS+mask_method+'.png', mosaic)
-    plt.figure(1)
-    plt.imshow(mosaic)
-    plt.show()
-    with open(PATH_TO_DATASET_JSON, 'w') as json_file:
-        json.dump(images, json_file)
-        logger.info("Saved dataset to {}".format(PATH_TO_DATASET_JSON))
-
-
-def save_contours():
-    for image_filename in glob.glob(PATH_TO_CONTOURS_IMGS+"/*"):
-        print(image_filename)
-        masked = io.imread(image_filename)
-
-        image = io.imread('dataset/'+get_filename_from_path(image_filename))
-        image = normalize_img(image)
-        fig, ax = plt.subplots(ncols=2, figsize=(8, 3))
-        ax[0].imshow(image)
-        ax[1].imshow(masked)
-        for a in ax:
-            a.axis('image')
-            a.set_xticks([])
-            a.set_yticks([])
-
-        plt.tight_layout()
-        plt.savefig('plots_contours/{}.png'.format(get_filename_from_path(image_filename, extension=False)), dpi=300)
-
-
 # if it doesn't exist create JSON file from image dataset for training
 if not file_exists(PATH_TO_DATASET_JSON):
     generate_dataset()
-generate_dataset(mask_method='polygon')
+# generate_dataset(mask_method='polygon')
 # generate_dataset(mask_method='binary_fill')
 
-# load image features and corresponding color classes
-df = pd.read_json(PATH_TO_DATASET_JSON)
-X = list(df['histo'])
-Y = list(df['color'])
-files = list(df['filename'])
-# print(df)
-
-
-def get_model(X_train=X, y_train=Y):
-    """
-    Given a list of feature vectors X, and a list of ground truth classes,
-    train the linear classifier and return the model
-    """
-    # clf = SGDClassifier()
-    clf = MultinomialNB()
-    clf.fit(X_train, y_train)
-    return clf
-
-
+X, Y = load_dataset()
 clf = get_model(X, Y)
-
-
-def eval_split_dataset():
-
-    # split dataset into training and testing
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, Y, test_size=0.02)
-
-    clf = get_model(X_train, y_train)
-
-    # test classifier on unknown image(s) from testing dataset
-    predicted = clf.predict(X_test)
-    print("Test:\t", y_test, '\n-->\t', predicted)
-
-    # calculate ratio of correct predictions
-    correct = np.zeros(len(X_test))
-    for i in range(len(X_test)):
-        correct[i] = 1 if (y_test[i] == predicted[i]) else 0
-    print("Ratio of correct predictions:", np.round(np.sum(correct)/len(X_test),2))
 
 
 def classify_objects(image, objects=None, save=False, filepath=None):
@@ -166,18 +44,16 @@ def classify_objects(image, objects=None, save=False, filepath=None):
     return clf.predict(X_test)
 
 
-def test_img(image_filename):
-    image_orig = io.imread(image_filename)
-    image = normalize_img(image_orig)
-
-    predicted = classify_objects(image, save=False, filepath=image_filename)
-
-    y_test = get_color_from_filename(image_filename)
-    print("Test:\t", y_test, '\n-->\t', predicted)
-
-
 if __name__ == '__main__':
-    eval_split_dataset()
+
+    def test_img(image_filename):
+        image_orig = io.imread(image_filename)
+        image = normalize_img(image_orig)
+
+        predicted = classify_objects(image, save=False, filepath=image_filename)
+
+        y_test = get_color_from_filename(image_filename)
+        print("Test:\t", y_test, '\n-->\t', predicted)
 
     # test_img("test/green.png")
     test_img(get_working_directory()+"/test/masked-1ros.png")

@@ -1,0 +1,55 @@
+import matplotlib.pyplot as plt
+import glob
+
+from utils.file import get_color_from_filename
+from utils.contours import get_contours, Object, select_best_object
+from utils.img import normalize_img, get_feature_vector, get_2d_image, create_mosaic, load_image
+from .classifierutils import logger, PATH_TO_DATASET_JSON, PATH_TO_DATASET_IMGS
+
+def generate_dataset(mask_method='polygon',
+                     resize_shape=(100, 100),
+                     histo_bins=10,
+                     equalize_histo=False,
+                     img_path=PATH_TO_DATASET_IMGS,
+                     output_path=PATH_TO_DATASET_JSON):
+    thumbnails = []
+    images = []
+    n_images = 0
+    for image_filename in glob.glob(img_path+"*"):
+        n_images += 1
+        # if n_images > 8:
+        #     break
+        image = load_image(image_filename)
+        logger.debug(image_filename)
+
+        try:
+            image = normalize_img(image, resize_shape=resize_shape)
+            image_value = get_2d_image(image, equalize_histo=equalize_histo)
+
+            contours = get_contours(image_value)
+            objects = [Object(contour, image, method=mask_method) for contour in contours]
+            object = select_best_object(objects, filter=False)
+            mask = object.get_mask(type=bool)
+
+            masked = object.get_masked_image()
+            thumbnails.append(masked)
+
+            # logger.debug(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename))
+            # io.imsave(PATH_TO_CONTOURS_IMGS+get_filename_from_path(image_filename), masked)
+
+            image_dict = {
+                'filename': image_filename,
+                # 'features':list(image_downscaled.flatten()),
+                'histo': get_feature_vector(image, mask=mask, bins=histo_bins),
+                'color': get_color_from_filename(image_filename)
+            }
+            images.append(image_dict)
+        except Exception as e:
+            logger.exception(e)
+            pass
+    mosaic = create_mosaic(images=thumbnails, rows_first=False)
+    # io.imsave(PATH_TO_CONTOURS_IMGS+mask_method+'.png', mosaic)
+    plt.figure(1)
+    plt.imshow(mosaic)
+    plt.show()
+    save_dataset(images)
