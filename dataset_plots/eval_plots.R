@@ -64,11 +64,18 @@ tuningplot <- ggplot(data.accuracy,aes(classifier,value))
 tuningplot + geom_col(aes(classifier,
                           value,
                           fill=variable),
-                      position = "dodge") +
+                      position = "dodge",
+                      width=0.7) +
   geom_text(aes(x=classifier,
                 y=value,
+                group=variable,
                 label=round(value,3)),
-            position=position_dodge(width=1),
-            vjust=-0.25)
-  
+            position=position_dodge(width=0.7),
+            vjust=+1.5) +
+  labs(x="Classifier",
+       y="Cross-Validation accuracy",
+       fill="Hyper-parameters") +
+  scale_color_discrete(breaks=c("accuracy_default", "accuracy_tuned"),
+                       labels=c("HSV", "RGB"))
+ggsave("accuracy-vs-tuning.png",width = 10, height=6)
 
