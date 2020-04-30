@@ -1,0 +1,4 @@
+,classifier,dataset,time_default,accuracy_default,time_tuned,accuracy_tuned
+0,MultinomialNB,dataset-hsv-10-.json,271.31288999225944,0.9375,275.4775380017236,0.94375
+1,BernoulliNB,dataset-hsv-10-.json,293.62912199576385,0.40625,300.6912989949342,0.89375
+2,SGDClassifier,dataset-hsv-10-.json,1597.829501988599,0.8625,1757.5238650024403,0.90625

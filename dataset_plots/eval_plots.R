@@ -56,3 +56,19 @@ lineplot +
         axis.text = element_text(size = 12),
         legend.text = element_text(size = 10))
 ggsave("time-vs-bins.png",width = 10, height=6)
+
+## TUNING PLOTS
+tuning_results <- read.csv("~/catkin_ws/src/lh7-nlp/vision_RGB/src/color_classifier/dataset_plots/tuning_results.csv")
+data.accuracy <- melt(tuning_results, id.vars=c("X","classifier"), measure.vars = c("accuracy_default","accuracy_tuned"))
+tuningplot <- ggplot(data.accuracy,aes(classifier,value))
+tuningplot + geom_col(aes(classifier,
+                          value,
+                          fill=variable),
+                      position = "dodge") +
+  geom_text(aes(x=classifier,
+                y=value,
+                label=round(value,3)),
+            position=position_dodge(width=1),
+            vjust=-0.25)
+  
+

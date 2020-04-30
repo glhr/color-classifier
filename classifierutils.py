@@ -17,7 +17,7 @@ HISTO_BINS = 10
 
 logger = get_logger()
 
-classifier_params = {
+default_params = {
     'MLPClassifier': {
         'solver': 'lbfgs'
     },
@@ -28,6 +28,9 @@ classifier_params = {
     'BernoulliNB': {
         # 'binarize': 0.5,
         'fit_prior': False
+    },
+    'SGDClassifier': {
+        'fit_intercept': False
     }
 }
 
@@ -76,8 +79,8 @@ def get_model(X_train,
     train the linear classifier and return the model
     """
     clf = classifier_dict[classifier]()
-    if classifier in classifier_params:
-        clf.set_params(**classifier_params[classifier])
+    if classifier in default_params:
+        clf.set_params(**default_params[classifier])
 
     X_train = standardize_data(X_train, classifier)
     clf.fit(X_train, y_train)
