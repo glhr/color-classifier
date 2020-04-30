@@ -22,11 +22,11 @@ classifier_params = {
         'solver': 'lbfgs'
     },
     'MultinomialNB': {
-        'alpha': 0.5,
+        # 'alpha': 0.5,
         'fit_prior': False
     },
     'BernoulliNB': {
-        'binarize': 0.5,
+        # 'binarize': 0.5,
         'fit_prior': False
     }
 }
@@ -59,7 +59,7 @@ classifier_dict = {
 
 def standardize_data(X_train, classifier):
 
-    if classifier in ['SGDClassifier', 'Perceptron']:
+    if classifier in ['SGDClassifier', 'Perceptron', 'PassiveAggressiveClassifier', 'MLPClassifier']:
         X_train = preprocessing.scale(X_train)
     elif classifier in ['BernoulliNB', 'MultinomialNB']:
         X_train = preprocessing.minmax_scale(X_train)

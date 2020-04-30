@@ -20,7 +20,7 @@ def generate_dataset(mask_method='polygon',
                      histo_channels='hsv',
                      equalize_histo=False,
                      img_path=PATH_TO_DATASET_IMGS,
-                     output_path=PATH_TO_DATASET_JSON,
+                     output_path=PATH_TO_DATASET_JSON.split('-')[0]+'.json',
                      overwrite_existing=False):
 
     output_path = "{}-{}-{}-{}.json".format(output_path.split('.')[-2], histo_channels, histo_bins, 'eq' if equalize_histo else '')
@@ -81,10 +81,10 @@ def generate_dataset(mask_method='polygon',
             except Exception as e:
                 logger.exception(e)
                 pass
-        mosaics_masked[color] = create_mosaic(images=thumbnails_masked, rows_first=False)
-        mosaics_orig[color] = create_mosaic(images=thumbnails_orig, rows_first=False)
-        save_image(mosaics_masked[color], PATH_TO_CONTOURS_IMGS+color+'.png')
-        save_image(mosaics_orig[color], PATH_TO_CONTOURS_IMGS+color+'_orig.png')
+        # mosaics_masked[color] = create_mosaic(images=thumbnails_masked, rows_first=False)
+        # mosaics_orig[color] = create_mosaic(images=thumbnails_orig, rows_first=False)
+        # save_image(mosaics_masked[color], PATH_TO_CONTOURS_IMGS+color+'.png')
+        # save_image(mosaics_orig[color], PATH_TO_CONTOURS_IMGS+color+'_orig.png')
         # plt.figure(1)
         # plt.imshow(mosaics[color])
         # plt.show()
@@ -96,23 +96,32 @@ if __name__ == '__main__':
 
     settings_list = [
         {
-            'histo_bins': 10,
-            'equalize_histo': True,
-            'histo_channels': 'hsv'
+            'histo_bins': 15,
+            'histo_channels': 'ycbcr'
         },
         {
-            'histo_bins': 20,
-            'equalize_histo': False,
-            'histo_channels': 'hsv'
-        },
-        {
-            'histo_bins': 20,
-            'equalize_histo': False,
+            'histo_bins': 15,
             'histo_channels': 'rgb'
+        },
+        {
+            'histo_bins': 15,
+            'histo_channels': 'hsv'
+        },
+        {
+            'histo_bins': 25,
+            'histo_channels': 'ycbcr'
+        },
+        {
+            'histo_bins': 25,
+            'histo_channels': 'rgb'
+        },
+        {
+            'histo_bins': 25,
+            'histo_channels': 'hsv'
         },
     ]
 
     for settings in settings_list:
         generate_dataset(img_path=PATH_TO_DATASET_IMGS,
-                         output_path=PATH_TO_DATASET_JSON,
+                         output_path=PATH_TO_DATASET_JSON.split('-')[0]+'.json',
                          **settings,)

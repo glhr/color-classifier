@@ -37,8 +37,8 @@ if __name__ == '__main__':
     #     'PassiveAggressiveClassifier',
     #     'BernoulliNB'
     # ]
-    # classifiers = list(classifier_dict.keys())
-    classifiers = ['SGDClassifier','BernoulliNB','MultinomialNB']
+    classifiers = list(classifier_dict.keys())
+    # classifiers = ['SGDClassifier','BernoulliNB','MultinomialNB']
     rows = []
     import glob
     for dataset in glob.glob('src/color_classifier/dataset_json/*.json'):
