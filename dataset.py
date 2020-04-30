@@ -96,27 +96,39 @@ if __name__ == '__main__':
 
     settings_list = [
         {
-            'histo_bins': 15,
+            'histo_bins': 51,
             'histo_channels': 'ycbcr'
         },
         {
-            'histo_bins': 15,
+            'histo_bins': 51,
             'histo_channels': 'rgb'
         },
         {
-            'histo_bins': 15,
+            'histo_bins': 51,
             'histo_channels': 'hsv'
         },
         {
-            'histo_bins': 25,
+            'histo_bins': 100,
             'histo_channels': 'ycbcr'
         },
         {
-            'histo_bins': 25,
+            'histo_bins': 100,
             'histo_channels': 'rgb'
         },
         {
-            'histo_bins': 25,
+            'histo_bins': 100,
+            'histo_channels': 'hsv'
+        },
+        {
+            'histo_bins': 255,
+            'histo_channels': 'ycbcr'
+        },
+        {
+            'histo_bins': 255,
+            'histo_channels': 'rgb'
+        },
+        {
+            'histo_bins': 255,
             'histo_channels': 'hsv'
         },
     ]

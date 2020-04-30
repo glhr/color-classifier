@@ -1,5 +1,5 @@
 eval_results <- read.csv("~/catkin_ws/src/lh7-nlp/vision_RGB/src/color_classifier/dataset_plots/eval_results.csv")
-eval <- subset(eval_results, (histo_eq == 'False'))
+eval <- subset(eval_results, (histo_eq == 'False' & histo_bins<=100))
 
 # reshape data
 library(reshape)
@@ -9,27 +9,34 @@ eval_SDG <- subset(eval, (classifier =='SGDClassifier' & histo_eq == 'False'))
 eval_BNB <- subset(eval, (classifier =='BernoulliNB' & histo_eq == 'False'))
 eval_MNB <- subset(eval, (classifier =='MultinomialNB' & histo_eq == 'False'))
 
-eval$histo_bins = as.factor(eval$histo_bins)
+# eval$histo_bins = as.factor(eval$histo_bins)
 data.accuracy <- melt(eval, id.vars=c("X","histo_bins","channels"), measure.vars = c("accuracy"))
-boxplot <- ggplot(data.accuracy,aes(histo_bins, value))
-boxplot + geom_boxplot(aes(fill=channels)) +
+boxplot <- ggplot(data.accuracy,aes(histo_bins, value,
+                                    group=interaction(histo_bins, channels),
+                                    color=channels))
+boxplot + geom_boxplot(width=0.9, outlier.shape = 1) +
   stat_summary(fun=median,
                geom="line",
                aes(group=channels, color=channels),
                position = position_dodge(width = 0.75),
                show.legend = FALSE)  + 
-  stat_summary(fun=median,
-               geom="point",
-               aes(group=channels, color=channels),
-               position = position_dodge(width = 0.75),
-               show.legend = FALSE)  + 
+  theme(axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),
+        legend.text = element_text(size = 12)) +
+  # stat_summary(fun=median,
+  #              geom="point",
+  #              aes(group=channels, color=channels),
+  #              position = position_dodge(width = 0),
+  #              show.legend = FALSE)  + 
   labs(x="Number of histogram bins",
        y="Cross-Validation accuracy\nacross all classifiers",
-       fill="Histogram\ncolour space") +
-  scale_fill_discrete(breaks=c("hsv", "rgb", "ycbcr"),
+       color="Histogram\ncolour space") +
+  scale_color_discrete(breaks=c("hsv", "rgb", "ycbcr"),
                       labels=c("HSV", "RGB", "YCbCr"))
+ggsave("accuracy-vs-bins.png",width = 10, height=6)
 
 eval <- subset(eval_results, (histo_eq == 'False'))
+eval$time = eval$time/1000
 data.time <- melt(eval, id.vars=c("X","histo_bins","classifier"), measure.vars = c("time"))
 lineplot <- ggplot(data.time, aes(histo_bins, value, color=classifier))
 lineplot +
@@ -41,4 +48,11 @@ lineplot +
   stat_summary(fun=mean,
                geom="line",
                aes(group=classifier, color=classifier),
-               show.legend = FALSE)
+               show.legend = FALSE) +
+  labs(x="Number of histogram bins",
+       y="Cross-Validation computation time (160 samples)\nin seconds",
+       color="Classifier") +
+  theme(axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),
+        legend.text = element_text(size = 10))
+ggsave("time-vs-bins.png",width = 10, height=6)
