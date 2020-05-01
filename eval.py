@@ -126,35 +126,36 @@ if __name__ == '__main__':
     # eval_to_csv()
     params_grid = {
         'MultinomialNB': {
-            'alpha': np.geomspace(0.0001, 1.0, num=2, endpoint=False),
+            'alpha': np.geomspace(0.0001, 1.0, num=100, endpoint=False),
             'fit_prior': [False],
         },
         'BernoulliNB': {
-            'alpha': np.geomspace(0.0001, 1.0, num=2, endpoint=False),
+            'alpha': np.geomspace(0.0001, 1.0, num=20, endpoint=False),
             'fit_prior': [False],
-            'binarize': np.linspace(0, 1.0, num=2, endpoint=False),
+            'binarize': np.linspace(0, 1.0, num=20, endpoint=False),
         },
-        # 'SGDClassifier': {
-        #     'loss': ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
-        #     'penalty': ['l2', 'l1', 'elasticnet'],
-        #     'fit_intercept': [True, False],
-        #     'learning_rate': ['constant', 'optimal', 'invscaling', 'adaptive'],
-        #     'eta0': np.geomspace(0.25, 4, num=5),
-        #     'max_iter': [1000, 2000, 4000]
-        # },
+        'SGDClassifier': {
+            'loss': ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
+            'penalty': ['l2', 'l1', 'elasticnet'],
+            'fit_intercept': [True, False],
+            # 'learning_rate': ['constant', 'optimal', 'invscaling', 'adaptive'],
+
+            # 'eta0': np.geomspace(0.25, 4, num=5),
+            'max_iter': [4000]
+        },
         'Perceptron': {
             'alpha': np.geomspace(0.0001, 0.1, num=4, endpoint=True),
             'penalty': ['l2', 'l1', 'elasticnet', None],
             'fit_intercept': [True, False],
             'eta0': np.geomspace(0.25, 4, num=5),
-            'max_iter': [1000, 2000, 4000]
+            'max_iter': [4000]
         },
-        # 'PassiveAggressiveClassifier': {
-        #     'loss': ['hinge', 'squared_hinge'],
-        #     'fit_intercept': [True, False],
-        #     'C': np.geomspace(0.125, 4, num=5),
-        #     'max_iter': [1000, 2000, 4000]
-        # },
+        'PassiveAggressiveClassifier': {
+            'loss': ['hinge', 'squared_hinge'],
+            'fit_intercept': [True, False],
+            'C': np.geomspace(0.125, 4, num=5),
+            'max_iter': [4000]
+        },
         # 'MLPClassifier': {
         #     'alpha': np.linspace(0.0001, 1.0, num=5, endpoint=False),
         #     'solver': ['lbfgs'],
