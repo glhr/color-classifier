@@ -58,62 +58,7 @@ def eval_to_csv():
         df.to_csv('src/color_classifier/dataset_plots/eval_results.csv')
 
 
-if __name__ == '__main__':
-
-    # eval_to_csv()
-    params_grid = {
-        'MultinomialNB': {
-            'alpha': np.geomspace(0.0001, 1.0, num=2, endpoint=False),
-            'fit_prior': [False],
-        },
-        'BernoulliNB': {
-            'alpha': np.geomspace(0.0001, 1.0, num=2, endpoint=False),
-            'fit_prior': [False],
-            'binarize': np.linspace(0, 1.0, num=2, endpoint=False),
-        },
-        'SGDClassifier': {
-            'loss': ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
-            'penalty': ['l2', 'l1', 'elasticnet'],
-            'fit_intercept': [True, False],
-            'learning_rate': ['constant', 'optimal', 'invscaling', 'adaptive'],
-            'eta0': np.geomspace(0.25, 4, num=5),
-            'max_iter': [1000, 2000, 4000]
-        },
-        'Perceptron': {
-            'alpha': np.geomspace(0.0001, 1.0, num=20, endpoint=False),
-            'penalty': ['l2', 'l1', 'elasticnet'],
-            'fit_intercept': [True, False],
-            'eta0': np.geomspace(0.25, 4, num=5),
-            'max_iter': [1000, 2000, 4000]
-        },
-        'PassiveAggressiveClassifier': {
-            'loss': ['hinge', 'squared_hinge'],
-            'fit_intercept': [True, False],
-            'C': np.geomspace(0.125, 4, num=5),
-            'max_iter': [1000, 2000, 4000]
-        },
-        'MLPClassifier': {
-            'alpha': np.linspace(0.0001, 1.0, num=5, endpoint=False),
-            'solver': ['lbfgs'],
-            'activation': ['identity', 'logistic', 'tanh', 'relu'],
-            'hidden_layer_sizes': [(10,), (50,), (100,)]
-        },
-    }
-
-    classifier = 'BernoulliNB'
-    chosen_settings = {
-        'channels': 'hsv',
-        'histo_bins': 10,
-        'histo_eq': False
-    }
-    chosen_dataset = 'src/color_classifier/dataset_json/dataset-{}-{}-{}.json'.format(
-        chosen_settings['channels'],
-        chosen_settings['histo_bins'],
-        chosen_settings['histo_eq'] if chosen_settings['histo_eq'] else ''
-    )
-
-    X, Y = load_dataset(path=chosen_dataset)
-
+def hyperparams_grid_search(X, Y, params_grid):
     rows = []
     for classifier in params_grid.keys():
         logger.info(classifier)
@@ -174,3 +119,75 @@ if __name__ == '__main__':
         df.to_csv('src/color_classifier/dataset_plots/tuning_results.csv', mode='a', header=False)
     else:
         df.to_csv('src/color_classifier/dataset_plots/tuning_results.csv')
+
+
+if __name__ == '__main__':
+
+    # eval_to_csv()
+    params_grid = {
+        'MultinomialNB': {
+            'alpha': np.geomspace(0.0001, 1.0, num=2, endpoint=False),
+            'fit_prior': [False],
+        },
+        'BernoulliNB': {
+            'alpha': np.geomspace(0.0001, 1.0, num=2, endpoint=False),
+            'fit_prior': [False],
+            'binarize': np.linspace(0, 1.0, num=2, endpoint=False),
+        },
+        # 'SGDClassifier': {
+        #     'loss': ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
+        #     'penalty': ['l2', 'l1', 'elasticnet'],
+        #     'fit_intercept': [True, False],
+        #     'learning_rate': ['constant', 'optimal', 'invscaling', 'adaptive'],
+        #     'eta0': np.geomspace(0.25, 4, num=5),
+        #     'max_iter': [1000, 2000, 4000]
+        # },
+        'Perceptron': {
+            'alpha': np.geomspace(0.0001, 0.1, num=4, endpoint=True),
+            'penalty': ['l2', 'l1', 'elasticnet', None],
+            'fit_intercept': [True, False],
+            'eta0': np.geomspace(0.25, 4, num=5),
+            'max_iter': [1000, 2000, 4000]
+        },
+        # 'PassiveAggressiveClassifier': {
+        #     'loss': ['hinge', 'squared_hinge'],
+        #     'fit_intercept': [True, False],
+        #     'C': np.geomspace(0.125, 4, num=5),
+        #     'max_iter': [1000, 2000, 4000]
+        # },
+        # 'MLPClassifier': {
+        #     'alpha': np.linspace(0.0001, 1.0, num=5, endpoint=False),
+        #     'solver': ['lbfgs'],
+        #     'activation': ['identity', 'logistic', 'tanh', 'relu'],
+        #     'hidden_layer_sizes': [(10,), (50,), (100,)]
+        # },
+    }
+
+    classifier = 'BernoulliNB'
+    chosen_settings = [
+        {
+            'channels': 'hsv',
+            'histo_bins': 10,
+            'histo_eq': False,
+        },
+        {
+            'channels': 'hsv',
+            'histo_bins': 20,
+            'histo_eq': False,
+        },
+        {
+            'channels': 'ycbcr',
+            'histo_bins': 15,
+            'histo_eq': False,
+        }
+    ]
+
+    for chosen_setting in chosen_settings:
+        chosen_dataset = 'src/color_classifier/dataset_json/dataset-{}-{}-{}.json'.format(
+            chosen_setting['channels'],
+            chosen_setting['histo_bins'],
+            chosen_setting['histo_eq'] if chosen_setting['histo_eq'] else ''
+        )
+
+        X, Y = load_dataset(path=chosen_dataset)
+        hyperparams_grid_search(X, Y, params_grid)
