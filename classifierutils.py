@@ -28,9 +28,6 @@ default_params = {
     'BernoulliNB': {
         # 'binarize': 0.5,
         'fit_prior': False
-    },
-    'SGDClassifier': {
-        'fit_intercept': False
     }
 }
 

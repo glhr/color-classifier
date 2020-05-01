@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 sys.path.append('.')
 
-from utils.file import get_filename_from_path
+from utils.file import get_filename_from_path, file_exists
 from utils.timing import CodeTimer
 from classifierutils import logger, default_params, standardize_data, load_dataset, classifier_dict
 
@@ -63,13 +63,13 @@ if __name__ == '__main__':
     # eval_to_csv()
     params_grid = {
         'MultinomialNB': {
-            'alpha': np.geomspace(0.0001, 1.0, num=20, endpoint=False),
+            'alpha': np.geomspace(0.0001, 1.0, num=2, endpoint=False),
             'fit_prior': [False],
         },
         'BernoulliNB': {
-            'alpha': np.geomspace(0.0001, 1.0, num=20, endpoint=False),
+            'alpha': np.geomspace(0.0001, 1.0, num=2, endpoint=False),
             'fit_prior': [False],
-            'binarize': np.linspace(0, 1.0, num=50, endpoint=False),
+            'binarize': np.linspace(0, 1.0, num=2, endpoint=False),
         },
         'SGDClassifier': {
             'loss': ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
@@ -89,15 +89,15 @@ if __name__ == '__main__':
         'PassiveAggressiveClassifier': {
             'loss': ['hinge', 'squared_hinge'],
             'fit_intercept': [True, False],
-            'C': np.geomspace(0.25, 8, num=6),
+            'C': np.geomspace(0.125, 4, num=5),
             'max_iter': [1000, 2000, 4000]
         },
-        # 'MLPClassifier': {
-        #     'alpha': np.linspace(0.0001, 1.0, num=5, endpoint=False),
-        #     'solver': ['lbfgs'],
-        #     'activation': ['identity', 'logistic', 'tanh', 'relu'],
-        #     'hidden_layer_sizes': [(10,), (50,), (100,)]
-        # },
+        'MLPClassifier': {
+            'alpha': np.linspace(0.0001, 1.0, num=5, endpoint=False),
+            'solver': ['lbfgs'],
+            'activation': ['identity', 'logistic', 'tanh', 'relu'],
+            'hidden_layer_sizes': [(10,), (50,), (100,)]
+        },
     }
 
     classifier = 'BernoulliNB'
@@ -116,6 +116,7 @@ if __name__ == '__main__':
 
     rows = []
     for classifier in params_grid.keys():
+        logger.info(classifier)
         clf = classifier_dict[classifier]()
 
         X = standardize_data(X, classifier)  # standardize data, method differs per classifier
@@ -128,6 +129,7 @@ if __name__ == '__main__':
                            cv=cv_generator)
         clf.fit(X, Y)  # perform grid search to find best parameters
         best_params = clf.best_params_
+        best_score = clf.best_score_
         print(clf.best_params_, clf.best_score_)
 
         # update classifier parameters
@@ -158,10 +160,17 @@ if __name__ == '__main__':
             'time_default': time_default,
             'accuracy_default': accuracy_default,
             'time_tuned': time_tuned,
-            'accuracy_tuned': accuracy_tuned
+            'accuracy_tuned': accuracy_tuned,
+            'accuracy_best': best_score,
+            'params_best': best_params
         })
     df = pd.DataFrame(rows)
     print(df)
-    df.to_csv('src/color_classifier/dataset_plots/{}-{}-tuning_results.csv'.format(
-        get_filename_from_path(chosen_dataset, extension=False),
-        '|'.join(list(params_grid.keys()))))
+    # df.to_csv('src/color_classifier/dataset_plots/{}-{}-tuning_results.csv'.format(
+    #     get_filename_from_path(chosen_dataset, extension=False),
+    #     '|'.join(list(params_grid.keys()))))
+    df.set_index(['classifier', 'dataset'])
+    if file_exists('src/color_classifier/dataset_plots/tuning_results.csv'):
+        df.to_csv('src/color_classifier/dataset_plots/tuning_results.csv', mode='a', header=False)
+    else:
+        df.to_csv('src/color_classifier/dataset_plots/tuning_results.csv')
