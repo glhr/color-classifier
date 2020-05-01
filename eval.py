@@ -63,11 +63,11 @@ if __name__ == '__main__':
     # eval_to_csv()
     params_grid = {
         'MultinomialNB': {
-            'alpha': np.linspace(1.0, 0, num=100, endpoint=False),
+            'alpha': np.geomspace(0.0001, 1.0, num=20, endpoint=False),
             'fit_prior': [False],
         },
         'BernoulliNB': {
-            'alpha': np.linspace(1.0, 0, num=50, endpoint=False),
+            'alpha': np.geomspace(0.0001, 1.0, num=20, endpoint=False),
             'fit_prior': [False],
             'binarize': np.linspace(0, 1.0, num=50, endpoint=False),
         },
@@ -75,12 +75,28 @@ if __name__ == '__main__':
             'loss': ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
             'penalty': ['l2', 'l1', 'elasticnet'],
             'fit_intercept': [True, False],
-            # 'learning_rate': ['constant', 'optimal', 'invscaling', 'adaptive'],
-            # 'eta0': [0.25, 0.5],
-            # 'max_iter': [1000, 2000]
-        }
+            'learning_rate': ['constant', 'optimal', 'invscaling', 'adaptive'],
+            'eta0': np.geomspace(0.25, 4, num=5),
+            'max_iter': [1000, 2000, 4000]
+        },
+        'Perceptron': {
+            'alpha': np.geomspace(0.0001, 1.0, num=20, endpoint=False),
+            'penalty': ['l2', 'l1', 'elasticnet'],
+            'fit_intercept': [True, False],
+            'eta0': np.geomspace(0.25, 4, num=5),
+            'max_iter': [1000, 2000, 4000]
+        },
+        'PassiveAggressiveClassifier': {
+            'loss': ['hinge', 'squared_hinge'],
+            'fit_intercept': [True, False],
+            'C': np.geomspace(0.25, 8, num=6),
+            'max_iter': [1000, 2000, 4000]
+        },
         # 'MLPClassifier': {
-        #     'solver': 'lbfgs'
+        #     'alpha': np.linspace(0.0001, 1.0, num=5, endpoint=False),
+        #     'solver': ['lbfgs'],
+        #     'activation': ['identity', 'logistic', 'tanh', 'relu'],
+        #     'hidden_layer_sizes': [(10,), (50,), (100,)]
         # },
     }
 
@@ -118,6 +134,8 @@ if __name__ == '__main__':
         clf_tuned = classifier_dict[classifier]().set_params(**best_params)
         if default_params.get(classifier) is not None:
             clf_default = classifier_dict[classifier]().set_params(**default_params.get(classifier))
+        else:
+            clf_default = classifier_dict[classifier]()
 
         # SAVE MEASUREMENTS
         # measure cross-validation computation time
@@ -144,4 +162,6 @@ if __name__ == '__main__':
         })
     df = pd.DataFrame(rows)
     print(df)
-    df.to_csv('src/color_classifier/dataset_plots/tuning_results.csv')
+    df.to_csv('src/color_classifier/dataset_plots/{}-{}-tuning_results.csv'.format(
+        get_filename_from_path(chosen_dataset, extension=False),
+        '|'.join(list(params_grid.keys()))))

@@ -1,0 +1,3 @@
+,classifier,dataset,time_default,accuracy_default,time_tuned,accuracy_tuned
+0,Perceptron,dataset-hsv-10-.json,1096.8330320029054,0.8625,1230.404728994472,0.90625
+1,PassiveAggressiveClassifier,dataset-hsv-10-.json,1297.8857429989148,0.89375,1301.0943459812552,0.9

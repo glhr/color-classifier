@@ -60,6 +60,7 @@ ggsave("time-vs-bins.png",width = 10, height=6)
 ## TUNING PLOTS
 tuning_results <- read.csv("~/catkin_ws/src/lh7-nlp/vision_RGB/src/color_classifier/dataset_plots/tuning_results.csv")
 data.accuracy <- melt(tuning_results, id.vars=c("X","classifier"), measure.vars = c("accuracy_default","accuracy_tuned"))
+data.timing <- melt(tuning_results, id.vars=c("X","classifier"), measure.vars = c("time_default","time_tuned"))
 tuningplot <- ggplot(data.accuracy,aes(classifier,value))
 tuningplot + geom_col(aes(classifier,
                           value,
@@ -74,8 +75,22 @@ tuningplot + geom_col(aes(classifier,
             vjust=+1.5) +
   labs(x="Classifier",
        y="Cross-Validation accuracy",
-       fill="Hyper-parameters") +
-  scale_color_discrete(breaks=c("accuracy_default", "accuracy_tuned"),
-                       labels=c("HSV", "RGB"))
-ggsave("accuracy-vs-tuning.png",width = 10, height=6)
+       fill="Hyper-parameters",
+       sec.axis="CV Computation time (s)") +
+  scale_fill_discrete(breaks=c("accuracy_default", "accuracy_tuned"),
+                       labels=c("Default params", "Best params\n(from Grid Search)")) +
+  theme(axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 11)) +
+  geom_point(data=data.timing,
+             aes(classifier,
+                 value /3000,
+                 group=variable),
+             position=position_dodge(width=0.7),
+             size = 2) +
+  scale_y_continuous(labels = function(x) paste0(x, ""),
+                     sec.axis = sec_axis(trans= ~.*3,
+                                         name = "Cross-Validation Computation time (s)"))
+ggsave("accuracy-vs-tuning.png",width = 14, height=6)
 
