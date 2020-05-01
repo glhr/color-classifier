@@ -11,6 +11,7 @@ Y = []
 
 # if it doesn't exist create JSON file from image dataset for training
 if not file_exists(PATH_TO_DATASET_JSON):
+    print("Generating dataset"+PATH_TO_DATASET_JSON)
     generate_dataset()
 # generate_dataset(mask_method='polygon')
 # generate_dataset(mask_method='binary_fill')
