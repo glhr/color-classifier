@@ -88,7 +88,7 @@ tuningplot + geom_col(aes(classifier,
                geom="point",
                data=data.timing,
              aes(classifier,
-                 value,
+                 value/3000,
                  group=variable),
              position=position_dodge(width=0.9),
              size = 2) +
@@ -96,7 +96,7 @@ tuningplot + geom_col(aes(classifier,
   scale_y_continuous(labels = function(x) paste0(x, ""),
                      limits=c(0, 1),
                      breaks=seq(0,1,0.2),
-                     sec.axis = sec_axis(trans= ~.,
-                                         name = "Cross-Validation Computation time (s)"))
+                     sec.axis = sec_axis(trans= ~.*3,
+                                         name = "Cross-Validation computation time (s)"))
 ggsave("accuracy-vs-tuning.png",width = 14, height=6)
 

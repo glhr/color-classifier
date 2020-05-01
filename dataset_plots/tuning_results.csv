@@ -1,6 +1,28 @@
-,classifier,dataset,time_default,accuracy_default,time_tuned,accuracy_tuned
-0,MultinomialNB,dataset-hsv-10-.json,271.31288999225944,0.9375,275.4775380017236,0.94375
-1,BernoulliNB,dataset-hsv-10-.json,293.62912199576385,0.40625,300.6912989949342,0.89375
-2,SGDClassifier,dataset-hsv-10-.json,1597.829501988599,0.8625,1757.5238650024403,0.90625
-3,Perceptron,dataset-hsv-10-.json,1100.3648730111308,0.8625,1431.3747599953786,0.9
-4,PassiveAggressiveClassifier,dataset-hsv-10-.json,1347.3165569885168,0.9,1377.5093239964917,0.90625
+,classifier,dataset,time_default,accuracy_default,time_tuned,accuracy_tuned,accuracy_best,params_best
+0,MultinomialNB,dataset-hsv-10-.json,267.3698420112487,0.9375,273.03993099485524,0.9375,0.9375,"{'alpha': 0.0001, 'fit_prior': False}"
+1,BernoulliNB,dataset-hsv-10-.json,312.93277800432406,0.40625,321.7683420225512,0.85,0.85,"{'alpha': 0.0001, 'binarize': 0.5, 'fit_prior': False}"
+0,MultinomialNB,dataset-ycbcr-10-.json,267.4859609978739,0.88125,287.5139859970659,0.89375,0.89375,"{'alpha': 0.0001, 'fit_prior': False}"
+1,BernoulliNB,dataset-ycbcr-10-.json,322.6430749928113,0.7375,330.333766003605,0.74375,0.74375,"{'alpha': 0.0001, 'binarize': 0.0, 'fit_prior': False}"
+0,MultinomialNB,dataset-hsv-10-.json,294.36825300217606,0.9375,294.9128159962129,0.9375,0.9375,"{'alpha': 0.0001, 'fit_prior': False}"
+1,BernoulliNB,dataset-hsv-10-.json,324.36591800069436,0.40625,332.1786730084568,0.85,0.85,"{'alpha': 0.0001, 'binarize': 0.5, 'fit_prior': False}"
+0,MultinomialNB,dataset-ycbcr-20-.json,284.72766300546937,0.9,286.67601599590853,0.90625,0.90625,"{'alpha': 0.01, 'fit_prior': False}"
+1,BernoulliNB,dataset-ycbcr-20-.json,332.199380005477,0.80625,347.361172985984,0.8,0.8,"{'alpha': 0.0001, 'binarize': 0.5, 'fit_prior': False}"
+0,MultinomialNB,dataset-hsv-10-.json,276.9189450191334,0.9375,279.0721910132561,0.9375,0.9375,"{'alpha': 0.0001, 'fit_prior': False}"
+1,BernoulliNB,dataset-hsv-10-.json,333.3891369984485,0.40625,331.2422689923551,0.85,0.85,"{'alpha': 0.0001, 'binarize': 0.5, 'fit_prior': False}"
+0,MultinomialNB,dataset-ycbcr-15-.json,281.07455899589695,0.9125,289.2092920083087,0.925,0.925,"{'alpha': 0.0001, 'fit_prior': False}"
+1,BernoulliNB,dataset-ycbcr-15-.json,332.8438620083034,0.78125,335.4266550159082,0.89375,0.89375,"{'alpha': 0.0001, 'binarize': 0.5, 'fit_prior': False}"
+0,MultinomialNB,dataset-hsv-10-.json,254.9881550075952,0.9375,263.5613379825372,0.9375,0.9375,"{'alpha': 0.0001, 'fit_prior': False}"
+1,BernoulliNB,dataset-hsv-10-.json,298.3773420273792,0.40625,301.5079490141943,0.85,0.85,"{'alpha': 0.0001, 'binarize': 0.5, 'fit_prior': False}"
+0,MultinomialNB,dataset-hsv-20-.json,266.7868619901128,0.9125,266.10177001566626,0.94375,0.94375,"{'alpha': 0.0001, 'fit_prior': False}"
+1,BernoulliNB,dataset-hsv-20-.json,332.2998959920369,0.45,336.34161698864773,0.84375,0.84375,"{'alpha': 0.01, 'binarize': 0.5, 'fit_prior': False}"
+0,MultinomialNB,dataset-ycbcr-15-.json,266.8687629920896,0.9125,274.7222889738623,0.925,0.925,"{'alpha': 0.0001, 'fit_prior': False}"
+1,BernoulliNB,dataset-ycbcr-15-.json,304.6950969728641,0.78125,404.65110100922175,0.89375,0.89375,"{'alpha': 0.0001, 'binarize': 0.5, 'fit_prior': False}"
+0,MultinomialNB,dataset-hsv-10-.json,256.84590794844553,0.9375,263.38874496286735,0.9375,0.9375,"{'alpha': 0.0001, 'fit_prior': False}"
+1,BernoulliNB,dataset-hsv-10-.json,295.6781100365333,0.40625,305.0258089788258,0.85,0.85,"{'alpha': 0.0001, 'binarize': 0.5, 'fit_prior': False}"
+2,Perceptron,dataset-hsv-10-.json,1134.3485050019808,0.8625,1229.4559979927726,0.9,0.9,"{'alpha': 0.0001, 'eta0': 0.5, 'fit_intercept': False, 'max_iter': 1000, 'penalty': 'l2'}"
+0,MultinomialNB,dataset-hsv-20-.json,298.37244999362156,0.9125,303.19836497073993,0.94375,0.94375,"{'alpha': 0.0001, 'fit_prior': False}"
+1,BernoulliNB,dataset-hsv-20-.json,324.9055480118841,0.45,328.31808598712087,0.84375,0.84375,"{'alpha': 0.01, 'binarize': 0.5, 'fit_prior': False}"
+2,Perceptron,dataset-hsv-20-.json,1313.8163900002837,0.91875,1334.399375016801,0.93125,0.93125,"{'alpha': 0.0001, 'eta0': 1.9999999999999998, 'fit_intercept': True, 'max_iter': 1000, 'penalty': 'l2'}"
+0,MultinomialNB,dataset-ycbcr-15-.json,290.37710500415415,0.9125,297.16670903144404,0.925,0.925,"{'alpha': 0.0001, 'fit_prior': False}"
+1,BernoulliNB,dataset-ycbcr-15-.json,350.5782270221971,0.78125,340.59709298890084,0.89375,0.89375,"{'alpha': 0.0001, 'binarize': 0.5, 'fit_prior': False}"
+2,Perceptron,dataset-ycbcr-15-.json,1933.1350940046832,0.84375,1500.8017889922485,0.875,0.875,"{'alpha': 0.0001, 'eta0': 1.9999999999999998, 'fit_intercept': True, 'max_iter': 1000, 'penalty': 'l2'}"
