@@ -3,7 +3,7 @@ from skimage import io
 from utils.img import normalize_img, get_2d_image, get_feature_vector
 from utils.contours import get_contours, Object
 from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
-from .classifierutils import logger, load_dataset, get_model, PATH_TO_DATASET_JSON, HISTO_BINS
+from .classifierutils import logger, load_dataset, get_model, PATH_TO_DATASET_JSON, HISTO_BINS, CHANNELS
 from .dataset import generate_dataset
 
 X = []
@@ -36,7 +36,7 @@ def classify_objects(image, objects=None, save=False, filepath=None):
     X_test = []
     for i, object in enumerate(objects):
         mask = object.get_mask(type=bool)
-        X_test.append(get_feature_vector(image, mask=mask, bins=HISTO_BINS))
+        X_test.append(get_feature_vector(image, mask=mask, bins=HISTO_BINS, channels=CHANNELS))
 
         if save and filepath is not None:
             masked = object.get_masked_image()

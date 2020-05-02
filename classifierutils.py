@@ -10,10 +10,12 @@ from sklearn.neural_network import MLPClassifier
 
 from utils.logger import get_logger
 
-PATH_TO_DATASET_JSON = 'src/color_classifier/dataset_json/dataset-hsv-10-.json'
+HISTO_BINS = 10
+CHANNELS = 'hsv'
+
+PATH_TO_DATASET_JSON = 'src/color_classifier/dataset_json/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
 PATH_TO_DATASET_IMGS = 'src/color_classifier/dataset_img/'
 PATH_TO_CONTOURS_IMGS = 'src/color_classifier/dataset_plots/'
-HISTO_BINS = 10
 
 logger = get_logger()
 
