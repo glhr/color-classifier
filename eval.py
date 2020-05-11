@@ -123,36 +123,36 @@ def hyperparams_grid_search(X, Y, params_grid, chosen_dataset):
 
 def tune_and_evaluate():
     params_grid = {
-        'MultinomialNB': {
-            'alpha': np.geomspace(0.0001, 1.0, num=100, endpoint=False),
-            'fit_prior': [False],
-        },
-        'BernoulliNB': {
-            'alpha': np.geomspace(0.0001, 1.0, num=20, endpoint=False),
-            'fit_prior': [False],
-            'binarize': np.linspace(0, 1.0, num=20, endpoint=False),
-        },
-        'SGDClassifier': {
-            'loss': ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
-            'penalty': ['l2', 'l1', 'elasticnet'],
-            'fit_intercept': [True, False],
-            # 'learning_rate': ['constant', 'optimal', 'invscaling', 'adaptive'],
-
-            # 'eta0': np.geomspace(0.25, 4, num=5),
-            'max_iter': [4000]
-        },
-        'Perceptron': {
-            'alpha': np.geomspace(0.0001, 0.1, num=4, endpoint=True),
-            'penalty': ['l2', 'l1', 'elasticnet', None],
-            'fit_intercept': [True, False],
-            'eta0': np.geomspace(0.25, 4, num=5),
-            'max_iter': [4000]
-        },
+        # 'MultinomialNB': {
+        #     'alpha': np.geomspace(0.0001, 1.0, num=100, endpoint=False),
+        #     'fit_prior': [False],
+        # },
+        # 'BernoulliNB': {
+        #     'alpha': np.geomspace(0.0001, 1.0, num=20, endpoint=False),
+        #     'fit_prior': [False],
+        #     'binarize': np.linspace(0, 1.0, num=20, endpoint=False),
+        # },
+        # 'SGDClassifier': {
+        #     'loss': ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
+        #     'penalty': ['l2', 'l1', 'elasticnet'],
+        #     'fit_intercept': [True, False],
+        #     # 'learning_rate': ['constant', 'optimal', 'invscaling', 'adaptive'],
+        #
+        #     # 'eta0': np.geomspace(0.25, 4, num=5),
+        #     'max_iter': [1000,2000,4000],
+        #     'average':[False,10,100]
+        # },
         'PassiveAggressiveClassifier': {
             'loss': ['hinge', 'squared_hinge'],
+            'early_stopping': [True,False],
             'fit_intercept': [True, False],
-            'C': np.geomspace(0.125, 4, num=5),
-            'max_iter': [4000]
+            'C': np.geomspace(0.0001, 100.0, num=7, endpoint=True),
+            'tol': np.geomspace(0.00001, 0.01, num=4, endpoint=True),
+            'validation_fraction': [0.05, 0.1, 0.2],
+            'n_iter_no_change': [1, 5, 10, 20],
+            'tol': [0.0001, 0.001, 0.01],
+            'max_iter': [1000,2000,4000],
+            'average':[False,10,100]
         },
         # 'MLPClassifier': {
         #     'alpha': np.linspace(0.0001, 1.0, num=5, endpoint=False),
@@ -165,17 +165,12 @@ def tune_and_evaluate():
     chosen_settings = [
         {
             'channels': 'hsv',
-            'histo_bins': 10,
-            'histo_eq': False,
-        },
-        {
-            'channels': 'hsv',
-            'histo_bins': 20,
+            'histo_bins': 32,
             'histo_eq': False,
         },
         {
             'channels': 'ycbcr',
-            'histo_bins': 15,
+            'histo_bins': 32,
             'histo_eq': False,
         }
     ]
@@ -194,3 +189,4 @@ def tune_and_evaluate():
 if __name__ == '__main__':
 
     default_evaluate()
+    tune_and_evaluate()
