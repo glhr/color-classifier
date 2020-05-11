@@ -3,7 +3,7 @@ from skimage import io
 from utils.img import normalize_img, get_2d_image, get_feature_vector
 from utils.contours import get_contours, Object
 from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
-from .classifierutils import logger, load_dataset, get_model, PATH_TO_DATASET_JSON, HISTO_BINS, CHANNELS
+from .classifierutils import logger, load_dataset, best_params, get_model, PATH_TO_DATASET_JSON, HISTO_BINS, CHANNELS
 from .dataset import generate_dataset
 
 X = []
@@ -16,8 +16,15 @@ if not file_exists(PATH_TO_DATASET_JSON):
 # generate_dataset(mask_method='polygon')
 # generate_dataset(mask_method='binary_fill')
 
+classifier = 'MultinomialNB'
 X, Y = load_dataset()
-clf = get_model(X, Y)
+clf = get_model(X, Y, classifier=classifier)
+
+dataset = get_filename_from_path(PATH_TO_DATASET_JSON, extension=True)
+if dataset in best_params:
+    if classifier in best_params[dataset]:
+        clf.set_params(**best_params[dataset][classifier])
+        logger.info("Loading tuned parameters for {}".format(classifier))
 
 
 def classify_objects(image, objects=None, save=False, filepath=None):
@@ -28,6 +35,8 @@ def classify_objects(image, objects=None, save=False, filepath=None):
     """
     global clf
     image_value = get_2d_image(image)
+
+    logger.debug("Classifier {} params: {}".format(classifier,clf.get_params()))
 
     if objects is None:
         contours = get_contours(image_value)
