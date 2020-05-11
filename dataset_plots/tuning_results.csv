@@ -7,3 +7,5 @@
 1,BernoulliNB,dataset-ycbcr-32-.json,372.8906950000237,0.8,380.24055699997916,0.90625,0.90625,"{'alpha': 0.002511886431509582, 'binarize': 0.2, 'fit_prior': False}"
 2,SGDClassifier,dataset-ycbcr-32-.json,1433.1958230000055,0.86875,1495.2575509996677,0.86875,0.86875,"{'fit_intercept': True, 'loss': 'perceptron', 'max_iter': 4000, 'penalty': 'l2'}"
 3,PassiveAggressiveClassifier,dataset-ycbcr-32-.json,2840.412813000057,0.85625,2827.7896849999706,0.84375,0.8625,"{'C': 4.0, 'fit_intercept': True, 'loss': 'squared_hinge', 'max_iter': 4000}"
+0,MultinomialNB,dataset-hsv-32-.json,306.4073349996761,0.89375,309.665632999895,0.93125,0.93125,"{'alpha': 0.002221946860939524, 'fit_prior': False}"
+0,MultinomialNB,dataset-ycbcr-32-.json,305.8541640002659,0.8875,309.4293579997611,0.925,0.925,"{'alpha': 0.0020255019392306666, 'fit_prior': False}"
