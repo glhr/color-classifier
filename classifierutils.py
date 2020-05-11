@@ -10,7 +10,7 @@ from sklearn.neural_network import MLPClassifier
 
 from utils.logger import get_logger
 
-HISTO_BINS = 10
+HISTO_BINS = 32
 CHANNELS = 'hsv'
 
 PATH_TO_DATASET_JSON = 'src/color_classifier/dataset_json/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
@@ -30,6 +30,19 @@ default_params = {
     'BernoulliNB': {
         # 'binarize': 0.5,
         'fit_prior': False
+    }
+}
+
+best_params = {
+    'dataset-hsv-32-.json': {
+        'MultinomialNB': {
+            'alpha': 0.0022908676527677745,
+            'fit_prior': False
+        },
+        'BernoulliNB': {
+            # 'binarize': 0.5,
+            'fit_prior': False
+        }
     }
 }
 

@@ -71,7 +71,8 @@ def hyperparams_grid_search(X, Y, params_grid, chosen_dataset):
         clf = GridSearchCV(estimator=clf,  # classifier object eg. BernoulliNB()
                            param_grid=parameters,
                            scoring='accuracy',
-                           cv=cv_generator)
+                           cv=cv_generator,
+                           verbose=5)
         clf.fit(X, Y)  # perform grid search to find best parameters
         best_params = clf.best_params_
         best_score = clf.best_score_
@@ -172,7 +173,7 @@ def tune_and_evaluate():
             'channels': 'ycbcr',
             'histo_bins': 32,
             'histo_eq': False,
-        }
+        },
     ]
 
     for chosen_setting in chosen_settings:
@@ -187,6 +188,5 @@ def tune_and_evaluate():
 
 
 if __name__ == '__main__':
-
-    default_evaluate()
     tune_and_evaluate()
+    # default_evaluate()
