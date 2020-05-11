@@ -1,5 +1,5 @@
-eval_results <- read.csv("~/catkin_ws/src/lh7-nlp/vision_RGB/src/color_classifier/dataset_plots/eval_results_robotpc.csv")
-eval <- subset(eval_results, (histo_eq == 'False' & histo_bins < 100))
+eval_results <- read.csv("~/catkin_ws/src/lh7-nlp/vision_RGB/src/color_classifier/dataset_plots/eval_results.csv")
+eval <- subset(eval_results, (histo_eq == 'False'))
 
 # reshape data
 library(reshape)
