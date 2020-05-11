@@ -94,44 +94,15 @@ def generate_dataset(mask_method='polygon',
 
 if __name__ == '__main__':
 
+    histo_bins = [1, 2, 4, 8, 16, 32, 64, 128, 256]
+    histo_channels = ['ycbcr', 'rgb', 'hsv']
     settings_list = [
         {
-            'histo_bins': 51,
-            'histo_channels': 'ycbcr'
-        },
-        {
-            'histo_bins': 51,
-            'histo_channels': 'rgb'
-        },
-        {
-            'histo_bins': 51,
-            'histo_channels': 'hsv'
-        },
-        {
-            'histo_bins': 100,
-            'histo_channels': 'ycbcr'
-        },
-        {
-            'histo_bins': 100,
-            'histo_channels': 'rgb'
-        },
-        {
-            'histo_bins': 100,
-            'histo_channels': 'hsv'
-        },
-        {
-            'histo_bins': 255,
-            'histo_channels': 'ycbcr'
-        },
-        {
-            'histo_bins': 255,
-            'histo_channels': 'rgb'
-        },
-        {
-            'histo_bins': 255,
-            'histo_channels': 'hsv'
-        },
+            'histo_bins': bins,
+            'histo_channels': channels
+        } for bins in histo_bins for channels in histo_channels
     ]
+    print(settings_list)
 
     for settings in settings_list:
         generate_dataset(img_path=PATH_TO_DATASET_IMGS,
