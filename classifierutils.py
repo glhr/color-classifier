@@ -36,7 +36,17 @@ default_params = {
 best_params = {
     'dataset-hsv-32-.json': {
         'MultinomialNB': {
-            'alpha': 0.0022908676527677745,
+            'alpha': 0.002221946860939524,
+            'fit_prior': False
+        },
+        'BernoulliNB': {
+            # 'binarize': 0.5,
+            'fit_prior': False
+        }
+    },
+    'dataset-ycbcr-32-.json': {
+        'MultinomialNB': {
+            'alpha': 0.0020255019392306666,
             'fit_prior': False
         },
         'BernoulliNB': {
