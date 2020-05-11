@@ -31,34 +31,34 @@ def eval_loo(X, Y, classifier):
     return accuracy, time, clf.get_params()
 
 
-def eval_to_csv():
-        classifiers = list(classifier_dict.keys())
-        # classifiers = ['SGDClassifier','BernoulliNB','MultinomialNB']
-        rows = []
-        import glob
-        for dataset in glob.glob('src/color_classifier/dataset_json/*.json'):
-            filename = get_filename_from_path(dataset, extension=False)
-            logger.info(filename)
-            channels, histo_bins, eq = filename.split('-')[1:]
-            X, Y = load_dataset(path=dataset)
-            # logger.info("Dataset size: {}".format(len(X)))
-            for classifier in classifiers:
-                accuracy, time, params = eval_loo(X, Y, classifier)
-                rows.append({
-                    'classifier': classifier,
-                    'channels': channels,
-                    'histo_bins':int(histo_bins),
-                    'histo_eq': True if len(eq) else False,
-                    'accuracy': accuracy,
-                    'time': time
-                })
+def default_evaluate():
+    classifiers = list(classifier_dict.keys())
+    # classifiers = ['SGDClassifier','BernoulliNB','MultinomialNB']
+    rows = []
+    import glob
+    for dataset in glob.glob('src/color_classifier/dataset_json/*.json'):
+        filename = get_filename_from_path(dataset, extension=False)
+        logger.info(filename)
+        channels, histo_bins, eq = filename.split('-')[1:]
+        X, Y = load_dataset(path=dataset)
+        # logger.info("Dataset size: {}".format(len(X)))
+        for classifier in classifiers:
+            accuracy, time, params = eval_loo(X, Y, classifier)
+            rows.append({
+                'classifier': classifier,
+                'channels': channels,
+                'histo_bins': int(histo_bins),
+                'histo_eq': True if len(eq) else False,
+                'accuracy': accuracy,
+                'time': time
+            })
 
-        df = pd.DataFrame(rows)
-        logger.info(df)
-        df.to_csv('src/color_classifier/dataset_plots/eval_results.csv')
+    df = pd.DataFrame(rows)
+    logger.info(df)
+    df.to_csv('src/color_classifier/dataset_plots/eval_results.csv')
 
 
-def hyperparams_grid_search(X, Y, params_grid):
+def hyperparams_grid_search(X, Y, params_grid, chosen_dataset):
     rows = []
     for classifier in params_grid.keys():
         logger.info(classifier)
@@ -121,9 +121,7 @@ def hyperparams_grid_search(X, Y, params_grid):
         df.to_csv('src/color_classifier/dataset_plots/tuning_results.csv')
 
 
-if __name__ == '__main__':
-
-    # eval_to_csv()
+def tune_and_evaluate():
     params_grid = {
         'MultinomialNB': {
             'alpha': np.geomspace(0.0001, 1.0, num=100, endpoint=False),
@@ -164,7 +162,6 @@ if __name__ == '__main__':
         # },
     }
 
-    classifier = 'BernoulliNB'
     chosen_settings = [
         {
             'channels': 'hsv',
@@ -191,4 +188,9 @@ if __name__ == '__main__':
         )
 
         X, Y = load_dataset(path=chosen_dataset)
-        hyperparams_grid_search(X, Y, params_grid)
+        hyperparams_grid_search(X, Y, params_grid, chosen_dataset)
+
+
+if __name__ == '__main__':
+
+    default_evaluate()

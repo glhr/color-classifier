@@ -1,5 +1,5 @@
-eval_results <- read.csv("~/catkin_ws/src/lh7-nlp/vision_RGB/src/color_classifier/dataset_plots/eval_results.csv")
-eval <- subset(eval_results, (histo_eq == 'False' & histo_bins<=100))
+eval_results <- read.csv("~/catkin_ws/src/lh7-nlp/vision_RGB/src/color_classifier/dataset_plots/eval_results_robotpc.csv")
+eval <- subset(eval_results, (histo_eq == 'False' & histo_bins < 100))
 
 # reshape data
 library(reshape)
@@ -58,7 +58,7 @@ lineplot +
 ggsave("time-vs-bins.png",width = 10, height=6)
 
 ## TUNING PLOTS
-tuning_results <- read.csv("~/catkin_ws/src/lh7-nlp/vision_RGB/src/color_classifier/dataset_plots/tuning_results.csv")
+tuning_results <- read.csv("~/catkin_ws/src/lh7-nlp/vision_RGB/src/color_classifier/dataset_plots/tuning_results_robotpc.csv")
 data.accuracy <- melt(tuning_results, id.vars=c("X","classifier","dataset"), measure.vars = c("accuracy_default","accuracy_tuned"))
 data.timing <- melt(tuning_results, id.vars=c("X","classifier","dataset"), measure.vars = c("time_default","time_tuned"))
 tuningplot <- ggplot(data.accuracy,aes(classifier,value))
