@@ -137,10 +137,11 @@ def tune_and_evaluate():
         #     'loss': ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
         #     'penalty': ['l2', 'l1', 'elasticnet'],
         #     'fit_intercept': [True, False],
-            # 'learning_rate': ['constant', 'optimal', 'invscaling', 'adaptive'],
-
-            # 'eta0': np.geomspace(0.25, 4, num=5),
-        #     'max_iter': [4000]
+        #     # 'learning_rate': ['constant', 'optimal', 'invscaling', 'adaptive'],
+        #
+        #     # 'eta0': np.geomspace(0.25, 4, num=5),
+        #     'max_iter': [1000,2000,4000],
+        #     'average':[False,10,100]
         # },
         # 'Perceptron': {
         #     'alpha': np.geomspace(0.0001, 0.1, num=4, endpoint=True),
