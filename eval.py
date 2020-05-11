@@ -36,7 +36,7 @@ def default_evaluate():
     # classifiers = ['SGDClassifier','BernoulliNB','MultinomialNB']
     rows = []
     import glob
-    for dataset in glob.glob('src/color_classifier/dataset_json/*.json'):
+    for dataset in glob.glob('dataset_json/*.json'):
         filename = get_filename_from_path(dataset, extension=False)
         logger.info(filename)
         channels, histo_bins, eq = filename.split('-')[1:]
@@ -55,7 +55,7 @@ def default_evaluate():
 
     df = pd.DataFrame(rows)
     logger.info(df)
-    df.to_csv('src/color_classifier/dataset_plots/eval_results.csv')
+    df.to_csv('dataset_plots/eval_results.csv')
 
 
 def hyperparams_grid_search(X, Y, params_grid, chosen_dataset):
@@ -115,10 +115,10 @@ def hyperparams_grid_search(X, Y, params_grid, chosen_dataset):
     #     get_filename_from_path(chosen_dataset, extension=False),
     #     '|'.join(list(params_grid.keys()))))
     df.set_index(['classifier', 'dataset'])
-    if file_exists('src/color_classifier/dataset_plots/tuning_results.csv'):
-        df.to_csv('src/color_classifier/dataset_plots/tuning_results.csv', mode='a', header=False)
+    if file_exists('dataset_plots/tuning_results.csv'):
+        df.to_csv('dataset_plots/tuning_results.csv', mode='a', header=False)
     else:
-        df.to_csv('src/color_classifier/dataset_plots/tuning_results.csv')
+        df.to_csv('dataset_plots/tuning_results.csv')
 
 
 def tune_and_evaluate():
@@ -176,7 +176,7 @@ def tune_and_evaluate():
     ]
 
     for chosen_setting in chosen_settings:
-        chosen_dataset = 'src/color_classifier/dataset_json/dataset-{}-{}-{}.json'.format(
+        chosen_dataset = 'dataset_json/dataset-{}-{}-{}.json'.format(
             chosen_setting['channels'],
             chosen_setting['histo_bins'],
             chosen_setting['histo_eq'] if chosen_setting['histo_eq'] else ''
@@ -188,5 +188,5 @@ def tune_and_evaluate():
 
 if __name__ == '__main__':
 
-    default_evaluate()
+    #default_evaluate()
     tune_and_evaluate()

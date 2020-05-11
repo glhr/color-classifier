@@ -13,9 +13,9 @@ from utils.logger import get_logger
 HISTO_BINS = 10
 CHANNELS = 'hsv'
 
-PATH_TO_DATASET_JSON = 'src/color_classifier/dataset_json/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
-PATH_TO_DATASET_IMGS = 'src/color_classifier/dataset_img/'
-PATH_TO_CONTOURS_IMGS = 'src/color_classifier/dataset_plots/'
+PATH_TO_DATASET_JSON = 'dataset_json/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
+PATH_TO_DATASET_IMGS = 'dataset_img/'
+PATH_TO_CONTOURS_IMGS = 'dataset_plots/'
 
 logger = get_logger()
 
