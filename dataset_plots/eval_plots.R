@@ -14,11 +14,11 @@ data.accuracy <- melt(eval, id.vars=c("X","histo_bins","channels"), measure.vars
 boxplot <- ggplot(data.accuracy,aes(histo_bins, value,
                                     group=interaction(histo_bins, channels),
                                     color=channels))
-boxplot + geom_boxplot(width=0.9, outlier.shape = 1) +
+boxplot + geom_boxplot(width=2, outlier.shape = 1) +
   stat_summary(fun=median,
                geom="line",
                aes(group=channels, color=channels),
-               position = position_dodge(width = 0.75),
+               position = position_dodge(width = 0.2),
                show.legend = FALSE)  + 
   theme(axis.title = element_text(size = 14),
         axis.text = element_text(size = 12),
