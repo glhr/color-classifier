@@ -23,8 +23,9 @@ classifier = 'MultinomialNB'
 X, Y = load_dataset()
 
 with CodeTimer() as timer:
-    clf = get_model(X, Y, classifier=classifier)
+    clf = get_model(X, Y, classifier=classifier, partial=True)
 logger.debug("{} took {} to train".format(classifier, timer.took))
+logger.debug("Initial partial fit, number of samples seen by model {}".format(clf.class_count_))
 
 dataset = get_filename_from_path(PATH_TO_DATASET_JSON, extension=True)
 # if dataset in best_params:
@@ -61,19 +62,21 @@ def classify_objects(image, objects=None, save=False, filepath=None):
 
 
 def add_training_image(image, object, color):
+    global clf
     logger.warning("Classifier: adding training image with color {}".format(color))
 
     mask = object.get_mask(type=bool)
     cropped_img = object.get_crop()
     path = 'src/color_classifier/dataset_user/{}-{}.png'.format(color, get_timestamp())
     save_image(cropped_img, path)
+    X = get_feature_vector(image,
+                           mask=mask,
+                           bins=HISTO_BINS,
+                           channels=CHANNELS)
     image_dict = {
         'filename': path,
         # 'features':list(image_downscaled.flatten()),
-        'histo': get_feature_vector(image,
-                                    mask=mask,
-                                    bins=HISTO_BINS,
-                                    channels=CHANNELS),
+        'histo': X,
         'color': color
     }
 
@@ -89,7 +92,9 @@ def add_training_image(image, object, color):
             data = [image_dict]
             json.dump(data, f)
 
-    print(image_dict)
+    # print(image_dict)
+    clf.partial_fit(X=[X], y=[color], sample_weight=[2])
+    logger.debug("After partial fit, number of samples seen by model {}".format(clf.class_count_))
     return None
 
 

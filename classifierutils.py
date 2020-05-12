@@ -10,6 +10,7 @@ from sklearn.neural_network import MLPClassifier
 
 from utils.logger import get_logger
 
+CLASSES = ['green', 'yellow', 'brown', 'black', 'blue', 'red', 'orange', 'purple']
 HISTO_BINS = 32
 CHANNELS = 'hsv'
 
@@ -98,6 +99,7 @@ def get_model(X_train,
               y_train,
               classifier='MultinomialNB',
               dataset='dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS),
+              partial=False,
               debug=False):
     """
     Given a list of feature vectors X, and a list of ground truth classes,
@@ -113,7 +115,10 @@ def get_model(X_train,
         clf.set_params(**default_params[classifier])
 
     X_train = standardize_data(X_train, classifier)
-    clf.fit(X_train, y_train)
+    if not partial:
+        clf.fit(X_train, y_train)
+    else:
+        clf.partial_fit(X_train, y_train, classes=CLASSES)
     if debug:
         logger.debug(clf.get_params())
     return clf
