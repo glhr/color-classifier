@@ -1,11 +1,13 @@
 from skimage import io
 
-from utils.img import normalize_img, get_2d_image, get_feature_vector
+from utils.img import normalize_img, get_2d_image, get_feature_vector, save_image
 from utils.contours import get_contours, Object
 from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
 from .classifierutils import logger, load_dataset, best_params, get_model, PATH_TO_DATASET_JSON, HISTO_BINS, CHANNELS
 from .dataset import generate_dataset
-from utils.timing import CodeTimer
+from utils.timing import CodeTimer, get_timestamp
+
+import json
 
 X = []
 Y = []
@@ -58,8 +60,36 @@ def classify_objects(image, objects=None, save=False, filepath=None):
     return clf.predict(X_test)
 
 
-def add_training_image(object, color):
+def add_training_image(image, object, color):
     logger.warning("Classifier: adding training image with color {}".format(color))
+
+    mask = object.get_mask(type=bool)
+    cropped_img = object.get_crop()
+    path = 'src/color_classifier/dataset_user/{}-{}.png'.format(color, get_timestamp())
+    save_image(cropped_img, path)
+    image_dict = {
+        'filename': path,
+        # 'features':list(image_downscaled.flatten()),
+        'histo': get_feature_vector(image,
+                                    mask=mask,
+                                    bins=HISTO_BINS,
+                                    channels=CHANNELS),
+        'color': color
+    }
+
+    dataset_path = 'src/color_classifier/dataset_user/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
+
+    if file_exists(dataset_path):
+        with open(dataset_path, 'r+') as f:
+            data = json.load(f)
+            data.append(image_dict)
+            json.dump(data, f)
+    else:
+        with open(dataset_path, 'w+') as f:
+            data = [image_dict]
+            json.dump(data, f)
+
+    print(image_dict)
     return None
 
 
