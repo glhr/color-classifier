@@ -1,10 +1,8 @@
 ,classifier,dataset,time_default,accuracy_default,time_tuned,accuracy_tuned,accuracy_best,params_best
 0,MultinomialNB,dataset-hsv-32-.json,310.96265600012885,0.89375,316.9178360001297,0.93125,0.93125,"{'alpha': 0.0022908676527677745, 'fit_prior': False}"
-1,BernoulliNB,dataset-hsv-32-.json,379.5577930000036,0.4625,379.20212500011985,0.8375,0.8375,"{'alpha': 0.0001, 'binarize': 0.35000000000000003, 'fit_prior': False}"
 2,SGDClassifier,dataset-hsv-32-.json,1394.3793319999713,0.8875,3326.174950999757,0.9,0.9125,"{'fit_intercept': True, 'loss': 'modified_huber', 'max_iter': 4000, 'penalty': 'elasticnet'}"
 3,PassiveAggressiveClassifier,dataset-hsv-32-.json,2494.741243000135,0.925,2493.0445720001444,0.9125,0.925,"{'C': 1.6817928305074283, 'fit_intercept': True, 'loss': 'squared_hinge', 'max_iter': 4000}"
 0,MultinomialNB,dataset-ycbcr-32-.json,311.4001499998267,0.8875,313.3136460000969,0.925,0.925,"{'alpha': 0.0020892961308540407, 'fit_prior': False}"
-1,BernoulliNB,dataset-ycbcr-32-.json,372.8906950000237,0.8,380.24055699997916,0.90625,0.90625,"{'alpha': 0.002511886431509582, 'binarize': 0.2, 'fit_prior': False}"
 2,SGDClassifier,dataset-ycbcr-32-.json,1433.1958230000055,0.86875,1495.2575509996677,0.86875,0.86875,"{'fit_intercept': True, 'loss': 'perceptron', 'max_iter': 4000, 'penalty': 'l2'}"
 3,PassiveAggressiveClassifier,dataset-ycbcr-32-.json,2840.412813000057,0.85625,2827.7896849999706,0.84375,0.8625,"{'C': 4.0, 'fit_intercept': True, 'loss': 'squared_hinge', 'max_iter': 4000}"
 0,BernoulliNB,dataset-hsv-32-.json,306.98105099145323,0.4625,311.1950120073743,0.85,0.85,"{'alpha': 0.0001, 'binarize': 0.32, 'fit_prior': True}"
