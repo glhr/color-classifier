@@ -5,6 +5,7 @@ from utils.contours import get_contours, Object
 from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
 from .classifierutils import logger, load_dataset, best_params, get_model, PATH_TO_DATASET_JSON, HISTO_BINS, CHANNELS
 from .dataset import generate_dataset
+from utils.timing import CodeTimer
 
 X = []
 Y = []
@@ -18,13 +19,16 @@ if not file_exists(PATH_TO_DATASET_JSON):
 
 classifier = 'MultinomialNB'
 X, Y = load_dataset()
-clf = get_model(X, Y, classifier=classifier)
+
+with CodeTimer() as timer:
+    clf = get_model(X, Y, classifier=classifier)
+logger.debug("{} took {} to train".format(classifier, timer.took))
 
 dataset = get_filename_from_path(PATH_TO_DATASET_JSON, extension=True)
-if dataset in best_params:
-    if classifier in best_params[dataset]:
-        clf.set_params(**best_params[dataset][classifier])
-        logger.info("Loading tuned parameters for {}".format(classifier))
+# if dataset in best_params:
+#     if classifier in best_params[dataset]:
+#         clf.set_params(**best_params[dataset][classifier])
+#         logger.info("Loading tuned parameters for {}".format(classifier))
 
 
 def classify_objects(image, objects=None, save=False, filepath=None):

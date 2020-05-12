@@ -97,13 +97,19 @@ def standardize_data(X_train, classifier):
 def get_model(X_train,
               y_train,
               classifier='MultinomialNB',
+              dataset='dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS),
               debug=False):
     """
     Given a list of feature vectors X, and a list of ground truth classes,
     train the linear classifier and return the model
     """
     clf = classifier_dict[classifier]()
-    if classifier in default_params:
+    if dataset in best_params:
+        if classifier in best_params[dataset]:
+            clf.set_params(**best_params[dataset][classifier])
+            logger.info("Loading tuned parameters for {}".format(classifier))
+    elif classifier in default_params:
+        logger.info("Loading default parameters for {}".format(classifier))
         clf.set_params(**default_params[classifier])
 
     X_train = standardize_data(X_train, classifier)
