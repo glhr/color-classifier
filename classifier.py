@@ -25,8 +25,11 @@ X, Y = load_dataset()
 with CodeTimer() as timer:
     clf = get_model(X, Y, classifier=classifier, partial=True)
 logger.debug("{} took {} to train".format(classifier, timer.took))
-logger.debug("Initial partial fit, number of samples seen by model {}".format(
-    list(zip(clf.classes_, clf.class_count_))))
+try:
+    logger.debug("Initial partial fit, number of samples seen by model {}".format(
+        list(zip(clf.classes_, clf.class_count_))))
+except AttributeError:
+    pass
 
 dataset = get_filename_from_path(PATH_TO_DATASET_JSON, extension=True)
 # if dataset in best_params:
