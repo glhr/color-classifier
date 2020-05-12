@@ -3,7 +3,7 @@ from skimage import io
 from utils.img import normalize_img, get_2d_image, get_feature_vector, save_image
 from utils.contours import get_contours, Object
 from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
-from .classifierutils import logger, load_dataset, best_params, get_model, PATH_TO_DATASET_JSON, HISTO_BINS, CHANNELS
+from .classifierutils import logger, load_dataset, best_params, get_model, PATH_TO_DATASET_JSON, HISTO_BINS, CHANNELS, CLASSIFIER
 from .dataset import generate_dataset
 from utils.timing import CodeTimer, get_timestamp
 
@@ -19,7 +19,7 @@ if not file_exists(PATH_TO_DATASET_JSON):
 # generate_dataset(mask_method='polygon')
 # generate_dataset(mask_method='binary_fill')
 
-classifier = 'MultinomialNB'
+classifier = CLASSIFIER
 X, Y = load_dataset()
 
 with CodeTimer() as timer:

@@ -13,6 +13,7 @@ from utils.logger import get_logger
 CLASSES = ['green', 'yellow', 'brown', 'black', 'blue', 'red', 'orange', 'purple']
 HISTO_BINS = 32
 CHANNELS = 'hsv'
+CLASSIFIER = 'BernoulliNB'
 
 PATH_TO_DATASET_JSON = 'src/color_classifier/dataset_json/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
 PATH_TO_DATASET_IMGS = 'src/color_classifier/dataset_img/'
