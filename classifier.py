@@ -54,6 +54,11 @@ def classify_objects(image, objects=None, save=False, filepath=None):
     return clf.predict(X_test)
 
 
+def add_training_image(object, color):
+    logger.warning("Classifier: adding training image with color {}".format(color))
+    return None
+
+
 if __name__ == '__main__':
 
     def test_img(image_filename):
