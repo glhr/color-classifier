@@ -62,6 +62,8 @@ def classify_objects(image, objects=None, save=False, filepath=None):
     return clf.predict(X_test)
 
 
+dataset_path = 'src/color_classifier/dataset_user/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
+
 def add_training_image(image, object, color):
     global clf
     logger.warning("Classifier: adding training image with color {}".format(color))
@@ -80,8 +82,6 @@ def add_training_image(image, object, color):
         'color': color
     }
 
-    dataset_path = 'src/color_classifier/dataset_user/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
-
     if file_exists(dataset_path):
         with open(dataset_path, 'r') as f:
             data = json.load(f)
@@ -99,6 +99,20 @@ def add_training_image(image, object, color):
         [color],
         list(zip(clf.classes_, clf.class_count_))))
     return None
+
+
+def update_model_with_user_data():
+    if file_exists(dataset_path):
+        with open(dataset_path, 'r') as f:
+            data = json.load(f)
+
+        for entry in data:
+            X = entry['histo']
+            y = entry['color']
+            clf.partial_fit(X=[X], y=[y], sample_weight=[2])
+            logger.debug("After partial fit on {}, number of samples seen by model {}".format(
+                [y],
+                list(zip(clf.classes_, clf.class_count_))))
 
 
 if __name__ == '__main__':
