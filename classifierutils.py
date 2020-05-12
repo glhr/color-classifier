@@ -40,8 +40,9 @@ best_params = {
             'fit_prior': False
         },
         'BernoulliNB': {
-            # 'binarize': 0.5,
-            'fit_prior': False
+            'alpha': 0.0001,
+            'binarize': 0.32,
+            'fit_prior': True
         }
     },
     'dataset-ycbcr-32-.json': {
@@ -50,7 +51,8 @@ best_params = {
             'fit_prior': False
         },
         'BernoulliNB': {
-            # 'binarize': 0.5,
+            'alpha': 0.0024420530945486497,
+            'binarize': 0.2,
             'fit_prior': False
         }
     }
