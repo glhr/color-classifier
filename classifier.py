@@ -25,7 +25,8 @@ X, Y = load_dataset()
 with CodeTimer() as timer:
     clf = get_model(X, Y, classifier=classifier, partial=True)
 logger.debug("{} took {} to train".format(classifier, timer.took))
-logger.debug("Initial partial fit, number of samples seen by model {}".format(clf.class_count_))
+logger.debug("Initial partial fit, number of samples seen by model {}".format(
+    list(zip(clf.classes_, clf.class_count_))))
 
 dataset = get_filename_from_path(PATH_TO_DATASET_JSON, extension=True)
 # if dataset in best_params:
@@ -75,7 +76,6 @@ def add_training_image(image, object, color):
                            channels=CHANNELS)
     image_dict = {
         'filename': path,
-        # 'features':list(image_downscaled.flatten()),
         'histo': X,
         'color': color
     }
@@ -83,18 +83,21 @@ def add_training_image(image, object, color):
     dataset_path = 'src/color_classifier/dataset_user/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
 
     if file_exists(dataset_path):
-        with open(dataset_path, 'r+') as f:
+        with open(dataset_path, 'r') as f:
             data = json.load(f)
             data.append(image_dict)
+        with open(dataset_path, 'w') as f:
             json.dump(data, f)
     else:
-        with open(dataset_path, 'w+') as f:
+        with open(dataset_path, 'w') as f:
             data = [image_dict]
             json.dump(data, f)
 
     # print(image_dict)
     clf.partial_fit(X=[X], y=[color], sample_weight=[2])
-    logger.debug("After partial fit, number of samples seen by model {}".format(clf.class_count_))
+    logger.debug("After partial fit on {}, number of samples seen by model {}".format(
+        [color],
+        list(zip(clf.classes_, clf.class_count_))))
     return None
 
 
