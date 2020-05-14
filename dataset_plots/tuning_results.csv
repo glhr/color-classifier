@@ -9,3 +9,5 @@
 0,BernoulliNB,dataset-ycbcr-32-.json,304.29886700585485,0.8,308.7969920015894,0.90625,0.90625,"{'alpha': 0.0024420530945486497, 'binarize': 0.2, 'fit_prior': False}"
 0,PassiveAggressiveClassifier,dataset-hsv-32-.json,2056.8263470195234,0.90625,13863.36454100092,0.95,0.95,"{'C': 0.0001, 'average': 10, 'fit_intercept': True, 'loss': 'squared_hinge', 'max_iter': 1000}"
 0,PassiveAggressiveClassifier,dataset-ycbcr-32-.json,2623.302417981904,0.85,4472.907461982686,0.88125,0.875,"{'C': 0.001, 'average': False, 'fit_intercept': True, 'loss': 'hinge', 'max_iter': 1000}"
+0,SGDClassifier,dataset-hsv-32-.json,1874.288544000592,0.93125,4344.725193994236,0.95625,0.95625,"{'alpha': 0.1, 'average': False, 'fit_intercept': False, 'loss': 'log', 'max_iter': 2000, 'penalty': 'l2'}"
+0,SGDClassifier,dataset-ycbcr-32-.json,1580.3167449994362,0.8625,2316.134251996118,0.8875,0.9,"{'alpha': 0.1, 'average': False, 'fit_intercept': True, 'loss': 'log', 'max_iter': 1000, 'penalty': 'l2'}"
