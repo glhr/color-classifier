@@ -128,11 +128,11 @@ def tune_and_evaluate():
         #     'alpha': np.geomspace(0.0001, 1.0, num=200, endpoint=True),
         #     'fit_prior': [True,False],
         #},
-        'BernoulliNB': {
-             'alpha': np.geomspace(0.0001, 1.0, num=50, endpoint=True),
-             'fit_prior': [True,False],
-             'binarize': np.linspace(0, 1.0, num=50, endpoint=False),
-        },
+        # 'BernoulliNB': {
+        #      'alpha': np.geomspace(0.0001, 1.0, num=50, endpoint=True),
+        #      'fit_prior': [True,False],
+        #      'binarize': np.linspace(0, 1.0, num=50, endpoint=False),
+        # },
         # 'SGDClassifier': {
         #     'loss': ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
         #     'penalty': ['l2', 'l1', 'elasticnet'],
@@ -150,18 +150,18 @@ def tune_and_evaluate():
         #     'eta0': np.geomspace(0.25, 4, num=5),
         #     'max_iter': [4000]
         # },
-        #'PassiveAggressiveClassifier': {
-        #    'loss': ['hinge', 'squared_hinge'],
-        #    'early_stopping': [True,False],
-        #    'fit_intercept': [True, False],
-        #    'C': np.geomspace(0.0001, 100.0, num=7, endpoint=True),
-        #    'tol': np.geomspace(0.00001, 0.01, num=4, endpoint=True),
-        #    'validation_fraction': [0.05, 0.1, 0.2],
-        #    'n_iter_no_change': [1, 5, 10, 20],
-        #    'tol': [0.0001, 0.001, 0.01],
-        #    'max_iter': [1000,2000,4000],
-        #    'average':[False,10,100]
-        #},
+        'PassiveAggressiveClassifier': {
+           'loss': ['hinge', 'squared_hinge'],
+           # 'early_stopping': [True,False],
+           'fit_intercept': [True, False],
+           'C': np.geomspace(0.0001, 100.0, num=7, endpoint=True),
+           # 'tol': np.geomspace(0.00001, 0.01, num=4, endpoint=True),
+           # 'validation_fraction': [0.05, 0.1, 0.2],
+           # 'n_iter_no_change': [1, 5, 10, 20],
+           # 'tol': [0.0001, 0.001, 0.01],
+           'max_iter': [1000,2000,4000],
+           'average':[False,10,100]
+        },
         # 'MLPClassifier': {
         #     'alpha': np.linspace(0.0001, 1.0, num=5, endpoint=False),
         #     'solver': ['lbfgs'],

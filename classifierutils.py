@@ -13,7 +13,7 @@ from utils.logger import get_logger
 CLASSES = ['green', 'yellow', 'brown', 'black', 'blue', 'red', 'orange', 'purple']
 HISTO_BINS = 32
 CHANNELS = 'hsv'
-CLASSIFIER = 'BernoulliNB'
+CLASSIFIER = 'MultinomialNB'
 
 PATH_TO_DATASET_JSON = 'src/color_classifier/dataset_json/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
 PATH_TO_DATASET_IMGS = 'src/color_classifier/dataset_img/'
@@ -25,14 +25,14 @@ default_params = {
     'MLPClassifier': {
         'solver': 'lbfgs'
     },
-    'MultinomialNB': {
-        # 'alpha': 0.5,
-        'fit_prior': False
-    },
-    'BernoulliNB': {
-        # 'binarize': 0.5,
-        'fit_prior': False
-    }
+    # 'MultinomialNB': {
+    #     # 'alpha': 0.5,
+    #     # 'fit_prior': False
+    # },
+    # 'BernoulliNB': {
+    #     # 'binarize': 0.5,
+    #     # 'fit_prior': False
+    # }
 }
 
 best_params = {
@@ -45,6 +45,13 @@ best_params = {
             'alpha': 0.0001,
             'binarize': 0.32,
             'fit_prior': True
+        },
+        'PassiveAggressiveClassifier': {
+            'C': 0.0001,
+            'average': 10,
+            'fit_intercept': True,
+            'loss': 'squared_hinge',
+            'max_iter': 1000
         }
     },
     'dataset-ycbcr-32-.json': {
@@ -56,6 +63,13 @@ best_params = {
             'alpha': 0.0024420530945486497,
             'binarize': 0.2,
             'fit_prior': False
+        },
+        'PassiveAggressiveClassifier': {
+            'C': 0.001,
+            'average': False,
+            'fit_intercept': True,
+            'loss': 'hinge',
+            'max_iter': 1000
         }
     }
 }
