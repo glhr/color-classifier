@@ -3,35 +3,58 @@ from skimage import io
 from utils.img import normalize_img, get_2d_image, get_feature_vector, save_image
 from utils.contours import get_contours, Object
 from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
-from .classifierutils import logger, load_dataset, best_params, get_model, PATH_TO_DATASET_JSON, PATH_TO_DATASET_USER, HISTO_BINS, CHANNELS, CLASSIFIER
+from .classifierutils import get_dataset_name, logger, load_dataset, best_params, get_model, dataset_folder, HISTO_BINS, CHANNELS, CLASSIFIER
 from .dataset import generate_dataset
 from utils.timing import CodeTimer, get_timestamp
+
+import numpy as np
 
 import json
 
 X = []
 Y = []
 
+classifier = CLASSIFIER
+channels = CHANNELS
+
+dataset = dataset_folder + 'dataset_json/' + get_dataset_name(channels=channels)
+dataset_user = dataset_folder + 'dataset_user/'
+dataset_user_path = '{}dataset-{}-{}-.json'.format(dataset_user, channels, HISTO_BINS)
+
+print(dataset)
 # if it doesn't exist create JSON file from image dataset for training
-if not file_exists(PATH_TO_DATASET_JSON):
-    print("Generating dataset"+PATH_TO_DATASET_JSON)
+if not file_exists(dataset):
+    import sys
+    sys.exit()
+    print("Generating dataset"+dataset)
     generate_dataset()
 # generate_dataset(mask_method='polygon')
 # generate_dataset(mask_method='binary_fill')
 
-classifier = CLASSIFIER
-X, Y = load_dataset()
+global clf
+CLASSIFIER_INITIALIZED = False
 
-with CodeTimer() as timer:
-    clf = get_model(X, Y, classifier=classifier, partial=True, use_best_params=False)
-logger.debug("{} took {} to train".format(classifier, timer.took))
-try:
-    logger.debug("Initial partial fit, number of samples seen by model {}".format(
-        list(zip(clf.classes_, clf.class_count_))))
-except AttributeError:
-    pass
+def initialize_classifier(channels_updated=channels, classifier_updated=classifier, use_best_params=True):
+    global classifier, channels, clf, X, Y, dataset, dataset_user_path, CLASSIFIER_INITIALIZED
+    dataset = dataset_folder + 'dataset_json/' + get_dataset_name(channels=channels_updated)
+    dataset_user_path = '{}dataset-{}-{}-.json'.format(dataset_user, channels, HISTO_BINS)
+    X, Y = load_dataset(path=dataset)
+    classifier = classifier_updated
+    logger.info(classifier)
+    channels = channels_updated
+    with CodeTimer() as timer:
+        clf = get_model(X, Y, classifier=classifier, partial=True, use_best_params=use_best_params)
+    logger.debug("{} took {} to train".format(classifier, timer.took))
+    try:
+        logger.debug("Initial partial fit, number of samples seen by model {}".format(
+            list(zip(clf.classes_, clf.class_count_))))
+    except AttributeError:
+        pass
+    CLASSIFIER_INITIALIZED = True
 
-dataset = get_filename_from_path(PATH_TO_DATASET_JSON, extension=True)
+
+
+# dataset = get_filename_from_path(dataset, extension=True)
 # if dataset in best_params:
 #     if classifier in best_params[dataset]:
 #         clf.set_params(**best_params[dataset][classifier])
@@ -45,6 +68,8 @@ def classify_objects(image, objects=None, save=False, filepath=None):
     The classification is done using the globally defined model (clf)
     """
     global clf
+    if not CLASSIFIER_INITIALIZED:
+        initialize_classifier()
     image_value = get_2d_image(image)
 
     logger.debug("Classifier {} params: {}".format(classifier,clf.get_params()))
@@ -56,7 +81,7 @@ def classify_objects(image, objects=None, save=False, filepath=None):
     X_test = []
     for i, object in enumerate(objects):
         mask = object.get_mask(type=bool)
-        X_test.append(get_feature_vector(image, mask=mask, bins=HISTO_BINS, channels=CHANNELS))
+        X_test.append(get_feature_vector(image, mask=mask, bins=HISTO_BINS, channels=channels))
 
         if save and filepath is not None:
             masked = object.get_masked_image()
@@ -64,35 +89,32 @@ def classify_objects(image, objects=None, save=False, filepath=None):
 
     return clf.predict(X_test)
 
-
-dataset_path = '{}dataset-{}-{}-.json'.format(PATH_TO_DATASET_USER, CHANNELS, HISTO_BINS)
-
 def add_training_image(image, object, color):
     global clf
-    logger.warning("Classifier: adding training image with color {}".format(color))
+    logger.warning("Classifier: adding training image with color {} for {}".format(color, channels))
 
     mask = object.get_mask(type=bool)
     cropped_img = object.get_crop()
-    path = '{}{}-{}.png'.format(PATH_TO_DATASET_USER, color, get_timestamp())
+    path = '{}{}-{}.png'.format(dataset_user, color, get_timestamp())
     # save_image(cropped_img, path)
     X = get_feature_vector(image,
                            mask=mask,
                            bins=HISTO_BINS,
-                           channels=CHANNELS)
+                           channels=channels)
     image_dict = {
         'filename': path,
         'histo': X,
         'color': color
     }
 
-    if file_exists(dataset_path):
-        with open(dataset_path, 'r') as f:
+    if file_exists(dataset_user_path):
+        with open(dataset_user_path, 'r') as f:
             data = json.load(f)
             data.append(image_dict)
-        with open(dataset_path, 'w') as f:
+        with open(dataset_user_path, 'w') as f:
             json.dump(data, f)
     else:
-        with open(dataset_path, 'w') as f:
+        with open(dataset_user_path, 'w') as f:
             data = [image_dict]
             json.dump(data, f)
 
@@ -105,20 +127,25 @@ def add_training_image(image, object, color):
 
 
 def update_model_with_user_data():
-    if file_exists(dataset_path):
-        with open(dataset_path, 'r') as f:
+    logger.warning(dataset_user_path)
+    if file_exists(dataset_user_path):
+        with open(dataset_user_path, 'r') as f:
             data = json.load(f)
 
         for entry in data:
             X = entry['histo']
-            y = entry['color']
-            clf.partial_fit(X=[X], y=[y], sample_weight=[2])
-            try:
-                logger.debug("After partial fit on {}, number of samples seen by model {}".format(
-                    [y],
-                    list(zip(clf.classes_, clf.class_count_))))
-            except AttributeError:
-                pass
+            if abs(np.sum(X)) > 0:
+                y = entry['color']
+                try:
+                    clf.partial_fit(X=[X], y=[y], sample_weight=[2])
+                except Exception:
+                    clf.partial_fit(X=[X], y=[y])
+                try:
+                    logger.debug("After partial fit on {}, number of samples seen by model {}".format(
+                        [y],
+                        list(zip(clf.classes_, clf.class_count_))))
+                except AttributeError:
+                    pass
 
 
 if __name__ == '__main__':

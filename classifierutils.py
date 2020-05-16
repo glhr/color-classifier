@@ -13,19 +13,26 @@ from utils.file import file_exists
 
 CLASSES = ['green', 'yellow', 'brown', 'black', 'blue', 'red', 'orange', 'purple']
 HISTO_BINS = 32
-CHANNELS = 'ycbcr'
-CLASSIFIER = 'SGDClassifier'
+CHANNELS = 'hsv'
+CLASSIFIER = 'MultinomialNB'
 
-PATH_TO_DATASET_JSON = 'src/color_classifier/dataset_json/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
-PATH_TO_DATASET_IMGS = 'src/color_classifier/dataset_img/'
-PATH_TO_CONTOURS_IMGS = 'src/color_classifier/dataset_plots/'
-PATH_TO_DATASET_USER = 'src/color_classifier/dataset_user/'
+
+def get_dataset_name(channels=CHANNELS, bins=HISTO_BINS):
+    return 'dataset-{}-{}-.json'.format(channels, bins)
+
+
+dataset_folder = 'src/color_classifier'
+
+PATH_TO_DATASET_JSON = '{}/dataset_json/{}'.format(dataset_folder, get_dataset_name())
 
 if not file_exists(PATH_TO_DATASET_JSON):
-    PATH_TO_DATASET_JSON = 'dataset_json/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
-    PATH_TO_DATASET_IMGS = 'dataset_img/'
-    PATH_TO_CONTOURS_IMGS = 'dataset_plots/'
-    PATH_TO_DATASET_USER = 'dataset_user/'
+    dataset_folder = ''
+
+PATH_TO_DATASET_JSON = '{}/dataset_json/{}'.format(dataset_folder, get_dataset_name())
+PATH_TO_DATASET_IMGS = '{}/dataset_img/'.format(dataset_folder)
+PATH_TO_CONTOURS_IMGS = '{}/dataset_plots/'.format(dataset_folder)
+PATH_TO_DATASET_USER = '{}/dataset_user/'.format(dataset_folder)
+
 
 logger = get_logger()
 
@@ -156,6 +163,7 @@ def save_dataset(images, output_path=PATH_TO_DATASET_JSON):
 
 def load_dataset(path=PATH_TO_DATASET_JSON):
     # load image features and corresponding color classes
+    logger.warning('Loading {}'.format(path))
     df = pd.read_json(path)
     X = list(df['histo'])
     Y = list(df['color'])

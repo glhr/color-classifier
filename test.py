@@ -6,8 +6,8 @@ from utils.contours import get_object_crops, select_best_object
 from utils.plotting import plot_bounding_boxes
 from utils.timing import get_timestamp
 from utils.file import get_filename_from_path
-from color_classifier.classifier import classify_objects, add_training_image, update_model_with_user_data
-from color_classifier.classifierutils import CHANNELS, HISTO_BINS, CLASSIFIER, PATH_TO_DATASET_JSON, best_params
+from color_classifier.classifier import channels, classifier, classify_objects, add_training_image, update_model_with_user_data, initialize_classifier
+from color_classifier.classifierutils import HISTO_BINS, PATH_TO_DATASET_JSON, best_params, classifier_dict
 from skimage.io import imread
 
 logger = get_logger()
@@ -100,45 +100,43 @@ def process_image(image_orig, run_classifier=True, placement='any', learn=False,
 
             img_boxes = plot_bounding_boxes(image, objects, predictions, None, show=False, numbering=False, correct_indexes=correct_indexes, ignore_indexes=ignore_indexes)
 
-        return img_boxes
+        return img_boxes, (correct, incorrect)
     else:
         logger.debug("No objects found :(")
         colors_detected = []
         image = adjust_image_range(image, max=255).astype(np.uint8)
-        return image
+        return image, None
 
 
 dataset = get_filename_from_path(PATH_TO_DATASET_JSON, extension=True)
 
 
-def save_classifier_output(afterlearning=False, reference_color=None):
+def save_classifier_output(test='', reference_color=None):
     # process and save a single image (for testing)
     logger.info("Saving and processing an image for testing")
     image = imread("test/{}.png".format(reference_color))
-    img_boxes = process_image(image, run_classifier=True, ref=salad_ref)
-    test = 'afterlearning' if afterlearning else 'beforelearning'
-    if CLASSIFIER not in best_params[dataset]:
-        test = 'beforetuning'
+    img_boxes, scores = process_image(image, run_classifier=True, ref=salad_ref)
     if reference_color is not None:
         save_image(img_boxes, 'test/{}-{}-{}-{}-{}.png'.format(
             reference_color,
-            CLASSIFIER,
+            classifier,
             HISTO_BINS,
-            CHANNELS,
+            channels,
             test))
         print(colors_detected)
     else:
         save_image(img_boxes, 'test/{}-{}-{}-{}.png'.format(
             reference_color,
-            CLASSIFIER,
+            classifier,
             HISTO_BINS,
-            CHANNELS,
+            channels,
             test))
     masks = np.zeros_like(image[:,:,0])
     for i, object in enumerate(objects):
         mask = object.get_mask(type=np.uint8, range=255)
         # save_image(mask, 'test/{} test-mask{}.png'.format(timestamp, i))
         masks += mask
+    return scores
     # save_image(masks, 'test/{}-mask.png'.format(reference_color))
 
 
@@ -147,7 +145,31 @@ def save_classifier_output(afterlearning=False, reference_color=None):
     # image = imread("test/{}.png".format(color))
     # img_boxes = process_image(image, run_classifier=False, learn=color)
 
+
 for color in ['salad']:
-    save_classifier_output(afterlearning=False, reference_color=color)
-    # update_model_with_user_data()
-    # save_classifier_output(afterlearning=True, reference_color=color)
+    results = []
+    for channels in ['ycbcr']:
+        for classifier in best_params[dataset].keys():
+        # for classifier in ['MultinomialNB']:
+            initialize_classifier(channels, classifier, use_best_params=False) # before tuning
+            score_beforetuning = save_classifier_output(test='beforetuning', reference_color=color)
+            initialize_classifier(channels, classifier, use_best_params=True) # after tuning
+            score_beforelearning = save_classifier_output(test='beforelearning', reference_color=color)
+            # initialize_classifier(channels, classifier, use_best_params=True) # after learning
+            update_model_with_user_data()
+            score_afterlearning = save_classifier_output(test='afterlearning', reference_color=color)
+
+            summary = {
+                'channels': channels,
+                'classifier': classifier,
+                'beforetuning': score_beforetuning,
+                'beforelearning': score_beforelearning,
+                'afterlearning': score_afterlearning
+                }
+            results.append(summary)
+
+import pandas as pd
+df = pd.DataFrame(results)
+df.to_csv('test/learningresults.csv')
+# update_model_with_user_data()
+# save_classifier_output(afterlearning=True, reference_color=color)
