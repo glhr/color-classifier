@@ -9,30 +9,30 @@ from sklearn.naive_bayes import MultinomialNB, BernoulliNB
 from sklearn.neural_network import MLPClassifier
 
 from utils.logger import get_logger
+from utils.file import file_exists
 
 CLASSES = ['green', 'yellow', 'brown', 'black', 'blue', 'red', 'orange', 'purple']
 HISTO_BINS = 32
-CHANNELS = 'hsv'
-CLASSIFIER = 'MultinomialNB'
+CHANNELS = 'ycbcr'
+CLASSIFIER = 'SGDClassifier'
 
 PATH_TO_DATASET_JSON = 'src/color_classifier/dataset_json/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
 PATH_TO_DATASET_IMGS = 'src/color_classifier/dataset_img/'
 PATH_TO_CONTOURS_IMGS = 'src/color_classifier/dataset_plots/'
+PATH_TO_DATASET_USER = 'src/color_classifier/dataset_user/'
+
+if not file_exists(PATH_TO_DATASET_JSON):
+    PATH_TO_DATASET_JSON = 'dataset_json/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
+    PATH_TO_DATASET_IMGS = 'dataset_img/'
+    PATH_TO_CONTOURS_IMGS = 'dataset_plots/'
+    PATH_TO_DATASET_USER = 'dataset_user/'
 
 logger = get_logger()
 
 default_params = {
     'MLPClassifier': {
         'solver': 'lbfgs'
-    },
-    # 'MultinomialNB': {
-    #     # 'alpha': 0.5,
-    #     # 'fit_prior': False
-    # },
-    # 'BernoulliNB': {
-    #     # 'binarize': 0.5,
-    #     # 'fit_prior': False
-    # }
+    }
 }
 
 best_params = {
@@ -52,6 +52,14 @@ best_params = {
             'fit_intercept': True,
             'loss': 'squared_hinge',
             'max_iter': 1000
+        },
+        'SGDClassifier': {
+            'alpha': 0.1,
+            'average': False,
+            'fit_intercept': False,
+            'loss': 'log',
+            'max_iter': 2000,
+            'penalty': 'l2'
         }
     },
     'dataset-ycbcr-32-.json': {
@@ -70,25 +78,17 @@ best_params = {
             'fit_intercept': True,
             'loss': 'hinge',
             'max_iter': 1000
+        },
+        'SGDClassifier': {
+            'alpha': 0.1,
+            'average': False,
+            'fit_intercept': True,
+            'loss': 'log',
+            'max_iter': 1000,
+            'penalty': 'l2'
         }
     }
 }
-
-#
-# classifier_dict = {
-#     'linear': {
-#         'SGDClassifier': SGDClassifier,
-#         'Perceptron': Perceptron,
-#         'PassiveAggressiveClassifier': PassiveAggressiveClassifier,
-#         },
-#     'proba': {
-#         'MultinomialNB': MultinomialNB,
-#         'BernoulliNB': BernoulliNB
-#     },
-#     'neural': {
-#         'MLPClassifier': MLPClassifier
-#     }
-# }
 
 classifier_dict = {
         'SGDClassifier': SGDClassifier,
@@ -114,6 +114,7 @@ def get_model(X_train,
               y_train,
               classifier='MultinomialNB',
               dataset='dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS),
+              use_best_params=True,
               partial=False,
               debug=False):
     """
@@ -122,7 +123,7 @@ def get_model(X_train,
     """
     clf = classifier_dict[classifier]()
     if dataset in best_params:
-        if classifier in best_params[dataset]:
+        if use_best_params and classifier in best_params[dataset]:
             clf.set_params(**best_params[dataset][classifier])
             logger.info("Loading tuned parameters for {}".format(classifier))
     elif classifier in default_params:

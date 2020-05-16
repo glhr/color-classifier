@@ -3,7 +3,7 @@ from skimage import io
 from utils.img import normalize_img, get_2d_image, get_feature_vector, save_image
 from utils.contours import get_contours, Object
 from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
-from .classifierutils import logger, load_dataset, best_params, get_model, PATH_TO_DATASET_JSON, HISTO_BINS, CHANNELS, CLASSIFIER
+from .classifierutils import logger, load_dataset, best_params, get_model, PATH_TO_DATASET_JSON, PATH_TO_DATASET_USER, HISTO_BINS, CHANNELS, CLASSIFIER
 from .dataset import generate_dataset
 from utils.timing import CodeTimer, get_timestamp
 
@@ -23,7 +23,7 @@ classifier = CLASSIFIER
 X, Y = load_dataset()
 
 with CodeTimer() as timer:
-    clf = get_model(X, Y, classifier=classifier, partial=True)
+    clf = get_model(X, Y, classifier=classifier, partial=True, use_best_params=False)
 logger.debug("{} took {} to train".format(classifier, timer.took))
 try:
     logger.debug("Initial partial fit, number of samples seen by model {}".format(
@@ -65,7 +65,7 @@ def classify_objects(image, objects=None, save=False, filepath=None):
     return clf.predict(X_test)
 
 
-dataset_path = 'src/color_classifier/dataset_user/dataset-{}-{}-.json'.format(CHANNELS, HISTO_BINS)
+dataset_path = '{}dataset-{}-{}-.json'.format(PATH_TO_DATASET_USER, CHANNELS, HISTO_BINS)
 
 def add_training_image(image, object, color):
     global clf
@@ -73,8 +73,8 @@ def add_training_image(image, object, color):
 
     mask = object.get_mask(type=bool)
     cropped_img = object.get_crop()
-    path = 'src/color_classifier/dataset_user/{}-{}.png'.format(color, get_timestamp())
-    save_image(cropped_img, path)
+    path = '{}{}-{}.png'.format(PATH_TO_DATASET_USER, color, get_timestamp())
+    # save_image(cropped_img, path)
     X = get_feature_vector(image,
                            mask=mask,
                            bins=HISTO_BINS,
@@ -113,9 +113,12 @@ def update_model_with_user_data():
             X = entry['histo']
             y = entry['color']
             clf.partial_fit(X=[X], y=[y], sample_weight=[2])
-            logger.debug("After partial fit on {}, number of samples seen by model {}".format(
-                [y],
-                list(zip(clf.classes_, clf.class_count_))))
+            try:
+                logger.debug("After partial fit on {}, number of samples seen by model {}".format(
+                    [y],
+                    list(zip(clf.classes_, clf.class_count_))))
+            except AttributeError:
+                pass
 
 
 if __name__ == '__main__':
