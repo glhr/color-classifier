@@ -17,15 +17,15 @@ Y = []
 classifier = CLASSIFIER
 channels = CHANNELS
 
-dataset = dataset_folder + 'dataset_json/' + get_dataset_name(channels=channels)
-dataset_user = dataset_folder + 'dataset_user/'
+dataset = dataset_folder + '/dataset_json/' + get_dataset_name(channels=channels)
+dataset_user = dataset_folder + '/dataset_user/'
 dataset_user_path = '{}dataset-{}-{}-.json'.format(dataset_user, channels, HISTO_BINS)
 
 print(dataset)
 # if it doesn't exist create JSON file from image dataset for training
 if not file_exists(dataset):
-    import sys
-    sys.exit()
+    logger.error("Dataset file {} not found".format(dataset))
+    raise FileNotFoundError
     print("Generating dataset"+dataset)
     generate_dataset()
 # generate_dataset(mask_method='polygon')
@@ -36,7 +36,7 @@ CLASSIFIER_INITIALIZED = False
 
 def initialize_classifier(channels_updated=channels, classifier_updated=classifier, use_best_params=True):
     global classifier, channels, clf, X, Y, dataset, dataset_user_path, CLASSIFIER_INITIALIZED
-    dataset = dataset_folder + 'dataset_json/' + get_dataset_name(channels=channels_updated)
+    dataset = dataset_folder + '/dataset_json/' + get_dataset_name(channels=channels_updated)
     dataset_user_path = '{}dataset-{}-{}-.json'.format(dataset_user, channels, HISTO_BINS)
     X, Y = load_dataset(path=dataset)
     classifier = classifier_updated
