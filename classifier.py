@@ -91,12 +91,16 @@ def classify_objects(image, objects=None, save=False, filepath=None):
 
 def add_training_image(image, object, color):
     global clf
+
+    if not CLASSIFIER_INITIALIZED:
+        initialize_classifier()
+
     logger.warning("Classifier: adding training image with color {} for {}".format(color, channels))
 
     mask = object.get_mask(type=bool)
     cropped_img = object.get_crop()
     path = '{}{}-{}.png'.format(dataset_user, color, get_timestamp())
-    # save_image(cropped_img, path)
+    save_image(cropped_img, path)
     X = get_feature_vector(image,
                            mask=mask,
                            bins=HISTO_BINS,
