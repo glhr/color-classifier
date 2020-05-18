@@ -116,10 +116,10 @@ def hyperparams_grid_search(X, Y, params_grid, chosen_dataset):
     #     get_filename_from_path(chosen_dataset, extension=False),
     #     '|'.join(list(params_grid.keys()))))
     df.set_index(['classifier', 'dataset'])
-    if file_exists('src/color_classifier/dataset_plots/tuning_results.csv'):
-        df.to_csv('src/color_classifier/dataset_plots/tuning_results.csv', mode='a', header=False)
+    if file_exists('src/color_classifier/dataset_plots/tuning_results_robotpc.csv'):
+        df.to_csv('src/color_classifier/dataset_plots/tuning_results_robotpc.csv', mode='a', header=False)
     else:
-        df.to_csv('src/color_classifier/dataset_plots/tuning_results.csv')
+        df.to_csv('src/color_classifier/dataset_plots/tuning_results_robotpc.csv')
 
 
 def tune_and_evaluate():
@@ -185,6 +185,7 @@ def tune_and_evaluate():
     ]
 
     for chosen_setting in chosen_settings:
+        logger.debug(chosen_setting)
         chosen_dataset = 'src/color_classifier/dataset_json/dataset-{}-{}-{}.json'.format(
             chosen_setting['channels'],
             chosen_setting['histo_bins'],
