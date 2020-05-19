@@ -1,0 +1,5 @@
+,channels,classifier,beforetuning,beforelearning,afterlearning
+0,ycbcr,MultinomialNB,"(23, 7)","(26, 4)","(24, 6)"
+1,ycbcr,BernoulliNB,"(25, 5)","(19, 11)","(19, 11)"
+2,ycbcr,PassiveAggressiveClassifier,"(16, 14)","(20, 10)","(19, 11)"
+3,ycbcr,SGDClassifier,"(13, 17)","(16, 14)","(16, 14)"
