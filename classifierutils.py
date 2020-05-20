@@ -11,7 +11,7 @@ from sklearn.neural_network import MLPClassifier
 from utils.logger import get_logger
 from utils.file import file_exists
 
-CLASSES = ['green', 'yellow', 'brown', 'black', 'blue', 'red', 'orange', 'purple']
+CLASSES = ['green', 'yellow', 'brown', 'black', 'blue', 'red', 'orange', 'purple', 'pink', 'white']
 HISTO_BINS = 32
 CHANNELS = 'hsv'
 CLASSIFIER = 'MultinomialNB'
