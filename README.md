@@ -12,7 +12,7 @@ This was developed using [classifiers which support online learning in `scikit-l
 pip3 install -r requirements --user
 ```
 
-The utils package here is also required:[https://bitbucket.org/lh7nlp/lh7-nlp/src/dev/vision_RGB/src/utils/](https://bitbucket.org/lh7nlp/lh7-nlp/src/dev/vision_RGB/src/utils/)
+The utils package here is also required:[https://github.com/glhr/img-utils](https://github.com/glhr/img-utils)
 
 ## Project structure
 
