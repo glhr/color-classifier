@@ -46,7 +46,10 @@ plot_feature_vector <- function(y, y.norm, channels, image) {
          y=element_blank(),
          title=paste(channels[1], "channel")) +
     theme_minimal() +
-    theme(plot.title = element_text(size = 10, hjust = 0.5))
+    theme(plot.title = element_text(size = 14, hjust = 0.5),
+          axis.title = element_text(size = 14),
+          axis.text = element_text(size = 14),
+          legend.text = element_text(size = 14))
   plot.2 <- ggplot(feature_vector.2, aes(x = x, y = y)) + geom_col() +
     scale_x_discrete(limits=c(0, 255)) +
     scale_y_continuous(breaks=seq(0, y.max, ticks),
@@ -56,7 +59,10 @@ plot_feature_vector <- function(y, y.norm, channels, image) {
          y=element_blank(),
          title=paste(channels[2], "channel")) +
     theme_minimal() +
-    theme(plot.title = element_text(size = 10, hjust = 0.5),
+    theme(plot.title = element_text(size = 14, hjust = 0.5),
+          axis.title = element_text(size = 14),
+          axis.text = element_text(size = 14),
+          legend.text = element_text(size = 14),
           axis.ticks = element_blank())
   plot.3 <- ggplot(feature_vector.3, aes(x = x, y = y)) + geom_col() +
     scale_x_discrete(limits=c(0, 255)) +
@@ -67,14 +73,20 @@ plot_feature_vector <- function(y, y.norm, channels, image) {
          y=element_blank(),
          x=element_blank()) +
     theme_minimal() +
-    theme(plot.title = element_text(size = 10, hjust = 0.5))
+    theme(plot.title = element_text(size = 14, hjust = 0.5),
+          axis.title = element_text(size = 14),
+          axis.text = element_text(size = 14),
+          legend.text = element_text(size = 14))
   plot.norm <- ggplot(feature_vector.norm, aes(x = x, y = y)) + geom_col() +
     scale_x_discrete(limits=seq(0,n_bins*3-1,n_bins),
                      breaks=seq(0,n_bins*3-1,n_bins)) +
     labs(x="Vector index",
          y="Vector value",
          title="Feature vector (normalized to unit length)") +
-    theme(plot.title = element_text(size = 12, face = 'italic', hjust = 0.5))
+    theme(plot.title = element_text(size = 14, face = 'italic', hjust = 0.5),
+          axis.title = element_text(size = 14),
+          axis.text = element_text(size = 14),
+           legend.text = element_text(size = 14))
 
   plot.row = arrangeGrob(plot.1, plot.2, plot.3, ncol=3,
                       left = textGrob("Bin counts", rot = 90, vjust = 0.5, ),

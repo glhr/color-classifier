@@ -84,7 +84,7 @@ tuningplot + geom_col(aes(classifier,
                geom="point",
                data=data.timing,
              aes(classifier,
-                 value/7000,
+                 value/5000,
                  group=variable),
              position=position_dodge(width=0.7),
              size =2.5) +
@@ -92,7 +92,7 @@ tuningplot + geom_col(aes(classifier,
   scale_y_continuous(labels = function(x) paste0(x, ""),
                      limits=c(0, 1),
                      breaks=seq(0,1,0.2),
-                     sec.axis = sec_axis(trans= ~.*7,
+                     sec.axis = sec_axis(trans= ~.*5,
                                          name = "Cross-Validation computation time (s)")) +
   scale_fill_manual(
     values = c("accuracy_default" = "azure3",
