@@ -4,6 +4,8 @@ Implementation of an object color classifier using machine learning and a small 
 
 This was developed using [classifiers which support online learning in `scikit-learn`](https://scikit-learn.org/0.15/modules/scaling_strategies.html#incremental-learning). For feature description, histograms in different colour spaces are compared.
 
+<img src="test/salad2-mask.png" alt="drawing" width="400"/> <img src="test/salad2-MultinomialNB-32-hsv-afterlearning.png" alt="drawing" width="400"/>
+
 ## Requirements
 
 ```bash
