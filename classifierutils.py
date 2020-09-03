@@ -11,7 +11,7 @@ from sklearn.neural_network import MLPClassifier
 from utils.logger import get_logger
 from utils.file import file_exists
 
-CLASSES = ['green', 'yellow', 'brown', 'black', 'blue', 'red', 'orange', 'purple', 'pink', 'white']
+CLASSES = ['green', 'yellow', 'brown', 'black', 'blue', 'red', 'orange', 'purple']
 HISTO_BINS = 32
 CHANNELS = 'hsv'
 CLASSIFIER = 'MultinomialNB'
@@ -46,7 +46,7 @@ best_params = {
     'dataset-hsv-32-.json': {
         'MultinomialNB': {
             'alpha': 0.002221946860939524,
-            'fit_prior': True
+            'fit_prior': False
         },
         'BernoulliNB': {
             'alpha': 0.0001,
