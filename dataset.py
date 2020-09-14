@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import glob
 
-from utils.file import get_color_from_filename, file_exists
-from utils.contours import get_contours, Object, select_best_object
-from utils.img import save_image, normalize_img, get_feature_vector, get_2d_image, create_mosaic, load_image
+from vision_utils.file import get_color_from_filename, file_exists
+from vision_utils.contours import get_contours, Object, select_best_object
+from vision_utils.img import save_image, normalize_img, get_feature_vector, get_2d_image, create_mosaic, load_image
 
 try:
     from .classifierutils import save_dataset, logger, PATH_TO_CONTOURS_IMGS, PATH_TO_DATASET_JSON, PATH_TO_DATASET_IMGS

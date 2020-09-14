@@ -1,11 +1,11 @@
 from skimage import io
 
-from utils.img import normalize_img, get_2d_image, get_feature_vector, save_image
-from utils.contours import get_contours, Object
-from utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
+from vision_utils.img import normalize_img, get_2d_image, get_feature_vector, save_image
+from vision_utils.contours import get_contours, Object
+from vision_utils.file import get_color_from_filename, get_working_directory, get_filename_from_path, file_exists
 from .classifierutils import get_dataset_name, logger, load_dataset, best_params, get_model, dataset_folder, HISTO_BINS, CHANNELS, CLASSIFIER
 from .dataset import generate_dataset
-from utils.timing import CodeTimer, get_timestamp
+from vision_utils.timing import CodeTimer, get_timestamp
 
 import numpy as np
 

@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 sys.path.append('.')
 
-from utils.file import get_filename_from_path, file_exists
-from utils.timing import CodeTimer
+from vision_utils.file import get_filename_from_path, file_exists
+from vision_utils.timing import CodeTimer
 from classifierutils import logger, default_params, standardize_data, load_dataset, classifier_dict
 
 

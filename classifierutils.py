@@ -8,8 +8,8 @@ from sklearn.linear_model import SGDClassifier, Perceptron, PassiveAggressiveCla
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB
 from sklearn.neural_network import MLPClassifier
 
-from utils.logger import get_logger
-from utils.file import file_exists
+from vision_utils.logger import get_logger
+from vision_utils.file import file_exists
 
 CLASSES = ['green', 'yellow', 'brown', 'black', 'blue', 'red', 'orange', 'purple']
 HISTO_BINS = 32

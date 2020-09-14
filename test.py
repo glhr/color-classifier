@@ -1,11 +1,11 @@
 import numpy as np
 
-from utils.logger import get_logger
-from utils.img import normalize_img, image_to_numpy, numpy_to_image, bgr_to_rgb, adjust_image_range, save_image
-from utils.contours import get_object_crops, select_best_object
-from utils.plotting import plot_bounding_boxes
-from utils.timing import get_timestamp
-from utils.file import get_filename_from_path
+from vision_utils.logger import get_logger
+from vision_utils.img import normalize_img, image_to_numpy, numpy_to_image, bgr_to_rgb, adjust_image_range, save_image
+from vision_utils.contours import get_object_crops, select_best_object
+from vision_utils.plotting import plot_bounding_boxes
+from vision_utils.timing import get_timestamp
+from vision_utils.file import get_filename_from_path
 from color_classifier.classifier import channels, classifier, classify_objects, add_training_image, update_model_with_user_data, initialize_classifier
 from color_classifier.classifierutils import HISTO_BINS, PATH_TO_DATASET_JSON, best_params, classifier_dict
 from skimage.io import imread
